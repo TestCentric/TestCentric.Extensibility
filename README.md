@@ -1,4 +1,4 @@
-# TestCentric Metadata
+﻿# TestCentric Metadata
 
 The `TestCentric.Metadata` library is used for accessing assembly metadata
 without loading the target assembly and without use of reflection. Most of

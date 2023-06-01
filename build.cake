@@ -1,9 +1,9 @@
 #tool NuGet.CommandLine&version=6.0.0
 
 // Load the recipe
-//#load nuget:?package=TestCentric.Cake.Recipe&version=1.0.1-dev00025
+#load nuget:?package=TestCentric.Cake.Recipe&version=1.0.1-dev00026
 // Comment out above line and uncomment below for local tests of recipe changes
-#load ../TestCentric.Cake.Recipe/recipe/*.cake
+//#load ../TestCentric.Cake.Recipe/recipe/*.cake
 
 var NUGET_ID = "TestCentric.Extensibility";
 

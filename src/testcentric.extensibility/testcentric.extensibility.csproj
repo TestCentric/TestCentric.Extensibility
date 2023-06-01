@@ -29,8 +29,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<None Include="..\..\LICENSE.txt" Pack="true" PackagePath="\" />
-		<None Include="..\..\README.md" Pack="true" PackagePath="\" />
+		<None Include="C:\Users\charlie\dev\TestCentric\TestCentric.Extensibility\LICENSE.txt" Pack="true" PackagePath="\" Link="LICENSE.txt" />
+		<None Include="C:\Users\charlie\dev\TestCentric\TestCentric.Extensibility\README.md" Pack="true" PackagePath="\" Link="README.md" />
 		<None Include="..\..\testcentric.png" Pack="true" PackagePath="\" />
 	</ItemGroup>
 
