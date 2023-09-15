@@ -299,7 +299,7 @@ namespace TestCentric.Extensibility
         /// </summary>
         private void ProcessAddinsFile(DirectoryInfo baseDir, string fileName, bool fromWildCard)
         {
-            log.Info("Processing file " + fileName);
+            log.Info("Processing addins file " + fileName);
 
             using (var rdr = new StreamReader(fileName))
             {
@@ -334,6 +334,8 @@ namespace TestCentric.Extensibility
             {
                 Visit(filePath);
 
+                log.Info($"Processing candidate assembly: {filePath} ,fromWildCard = {fromWildCard}");
+
                 try
                 {
                     var candidate = new ExtensionAssembly(filePath, fromWildCard);
@@ -345,12 +347,18 @@ namespace TestCentric.Extensibility
                         if (candidate.IsDuplicateOf(assembly))
                         {
                             if (candidate.IsBetterVersionOf(assembly))
+                            {
                                 _extensionAssemblies[i] = candidate;
-
+                                log.Debug("  Duplicate assembly replaced by better version");
+                            }
+                            else
+                                log.Debug("  Duplicate assembly ignored");
+                            
                             return;
                         }
                     }
 
+                    log.Debug("  Candidate assembly was added");
                     _extensionAssemblies.Add(candidate);
                 }
                 catch (BadImageFormatException e)
@@ -364,6 +372,8 @@ namespace TestCentric.Extensibility
                         throw;
                 }
             }
+            else
+                log.Debug($"Skipping candidate assembly {filePath} - Already Visited");
         }
 
         private Dictionary<string, object> _visited = new Dictionary<string, object>();
