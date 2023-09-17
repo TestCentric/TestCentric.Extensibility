@@ -8,125 +8,85 @@ using System.Linq;
 using System.IO;
 using System.Reflection;
 using System.Collections.Generic;
-using NUnit.Engine;
-using NUnit.Engine.Extensibility;
 using NUnit.Framework;
 
 namespace TestCentric.Extensibility
 {
     public class ExtensionManagerTests
     {
+        private static readonly Assembly THIS_ASSEMBLY = typeof(ExtensionManagerTests).Assembly;
+        private static readonly ExtensionManagerTestData[] Examples = ExtensionManagerTestData.Examples;
+
         private ExtensionManager _extensionManager;
-
-#pragma warning disable 414
-        private static readonly string[] KnownExtensionPointPaths = {
-            "/NUnit/Engine/TypeExtensions/IProjectLoader",
-            "/NUnit/Engine/TypeExtensions/IResultWriter",
-            "/NUnit/Engine/TypeExtensions/ITestEventListener",
-            "/NUnit/Engine/TypeExtensions/IDriverFactory",
-            "/NUnit/Engine/TypeExtensions/IService",
-            //"/NUnit/Engine/NUnitV2Driver"
-        };
-
-        private static readonly Type[] KnownExtensionPointTypes = {
-            typeof(IProjectLoader),
-            typeof(IResultWriter),
-            typeof(ITestEventListener),
-            typeof(IDriverFactory),
-            typeof(IService),
-            //typeof(IFrameworkDriver)
-        };
-
-        private static readonly int[] KnownExtensionPointCounts = { 1, 1, 2, 0, 1, 2 };
-#pragma warning restore 414
 
         [SetUp]
         public void CreateManager()
         {
             _extensionManager = new ExtensionManager();
 
-            // Rather than actually starting the service, which would result
-            // in finding the extensions actually in use on the current system,
-            // we simulate the start using this assemblies dummy extensions.
-            _extensionManager.FindExtensionPoints(typeof(ExtensionManager).Assembly);
-            _extensionManager.FindExtensionPoints(typeof(ITestEngine).Assembly);
-
-            _extensionManager.FindExtensionsInAssembly(new ExtensionAssembly(GetType().Assembly.Location, false));
+            // Setup manager to use dummy extension points and extensions in this assembly.
+            _extensionManager.FindExtensionPoints(THIS_ASSEMBLY);
+            _extensionManager.FindExtensionsInAssembly(new ExtensionAssembly(THIS_ASSEMBLY.Location, false));
         }
 
         [Test]
         public void AllExtensionPointsAreKnown()
         {
-            Assert.That(_extensionManager.ExtensionPoints.Select(ep => ep.Path), Is.EquivalentTo(KnownExtensionPointPaths));
+            Assert.That(_extensionManager.ExtensionPoints.Select(ep => ep.Path), Is.EquivalentTo(Examples.Select(d => d.Path))) ;
         }
 
-        [Test, Sequential]
-        public void CanGetExtensionPointByPath(
-            [ValueSource(nameof(KnownExtensionPointPaths))] string path,
-            [ValueSource(nameof(KnownExtensionPointTypes))] Type type)
+        [TestCaseSource(nameof(Examples))]
+        public void CanGetExtensionPointByPath(ExtensionManagerTestData data)
         {
-            var ep = _extensionManager.GetExtensionPoint(path);
+            var ep = _extensionManager.GetExtensionPoint(data.Path);
             Assert.NotNull(ep);
-            Assert.That(ep.Path, Is.EqualTo(path));
-            Assert.That(ep.TypeName, Is.EqualTo(type.FullName));
+            Assert.That(ep.Path, Is.EqualTo(data.Path));
+            Assert.That(ep.TypeName, Is.EqualTo(data.ExtensionPointType.FullName));
         }
 
-        [Test, Sequential]
-        public void CanGetExtensionPointByType(
-            [ValueSource(nameof(KnownExtensionPointPaths))] string path,
-            [ValueSource(nameof(KnownExtensionPointTypes))] Type type)
+        [TestCaseSource(nameof(Examples))]
+        public void CanGetExtensionPointByType(ExtensionManagerTestData data)
         {
-            var ep = _extensionManager.GetExtensionPoint(type);
+            // Can't look up assembly attribtue specified path
+            Assume.That(data.Path != "/TestCentric/DoesSomething");
+
+            var ep = _extensionManager.GetExtensionPoint(data.ExtensionPointType);
             Assert.NotNull(ep);
-            Assert.That(ep.Path, Is.EqualTo(path));
-            Assert.That(ep.TypeName, Is.EqualTo(type.FullName));
+            Assert.That(ep.Path, Is.EqualTo(data.Path));
+            Assert.That(ep.TypeName, Is.EqualTo(data.ExtensionPointType.FullName));
         }
 
-#pragma warning disable 414
-        private static readonly string[] KnownExtensions = {
-            "TestCentric.Engine.DummyProjectLoaderExtension",
-            "TestCentric.Engine.DummyResultWriterExtension",
-            "TestCentric.Engine.DummyEventListenerExtension",
-            "TestCentric.Engine.DummyServiceExtension"
-        };
-#pragma warning restore 414
+        [TestCaseSource(nameof(Examples))]
+        public void CanListExtensions(ExtensionManagerTestData data)
+        {
+            Assert.That(_extensionManager.Extensions,
+                Has.Some.Property(nameof(ExtensionNode.TypeName)).EqualTo(data.ExtensionType.FullName));
+        }
 
-        //[TestCaseSource(nameof(KnownExtensions))]
-        //public void CanListExtensions(string typeName)
-        //{
-        //    Assert.That(_extensionManager.Extensions,
-        //        Has.One.Property(nameof(ExtensionNode.TypeName)).EqualTo(typeName)
-        //           .And.Property(nameof(ExtensionNode.Enabled)).True);
-        //}
+        [TestCaseSource(nameof(Examples))]
+        public void ExtensionsAreAddedToExtensionPoint(ExtensionManagerTestData data)
+        {
+            var nodes = _extensionManager.Extensions.Where(n => n.TypeName == data.ExtensionType.FullName);
+            Assert.That(nodes.Count, Is.EqualTo(1)); // Count of 1 is particular to our test setup
+        }
 
-        //[Test, Sequential]
-        //public void ExtensionsAreAddedToExtensionPoint(
-        //    [ValueSource(nameof(KnownExtensionPointPaths))] string path,
-        //    [ValueSource(nameof(KnownExtensionPointCounts))] int extensionCount)
-        //{
-        //    var ep = _extensionManager.GetExtensionPoint(path);
-        //    Assume.That(ep, Is.Not.Null);
+        [Test]
+        public void ExtensionMayBeDisabledByDefault()
+        {
+            Assert.That(_extensionManager.Extensions,
+                Has.One.Property(nameof(ExtensionNode.TypeName)).EqualTo("TestCentric.Extensibility.DoesYetAnotherThing")
+                   .And.Property(nameof(ExtensionNode.Enabled)).False);
+        }
 
-        //    Assert.That(ep.Extensions.Count, Is.EqualTo(extensionCount));
-        //}
+        [Test]
+        public void DisabledExtensionMayBeEnabled()
+        {
+            _extensionManager.EnableExtension("TestCentric.Extensibility.DoesYetAnotherThing", true);
 
-        //[Test]
-        //public void ExtensionMayBeDisabledByDefault()
-        //{
-        //    Assert.That(_extensionManager.Extensions,
-        //        Has.One.Property(nameof(ExtensionNode.TypeName)).EqualTo("TestCentric.Engine.DummyDisabledExtension")
-        //           .And.Property(nameof(ExtensionNode.Enabled)).False);
-        //}
-
-        //[Test]
-        //public void DisabledExtensionMayBeEnabled()
-        //{
-        //    _extensionManager.EnableExtension("TestCentric.Engine.DummyDisabledExtension", true);
-
-        //    Assert.That(_extensionManager.Extensions,
-        //        Has.One.Property(nameof(ExtensionNode.TypeName)).EqualTo("TestCentric.Engine.DummyDisabledExtension")
-        //           .And.Property(nameof(ExtensionNode.Enabled)).True);
-        //}
+            Assert.That(_extensionManager.Extensions,
+                Has.One.Property(nameof(ExtensionNode.TypeName)).EqualTo("TestCentric.Extensibility.DoesYetAnotherThing")
+                   .And.Property(nameof(ExtensionNode.Enabled)).True);
+        }
 
         //[Test]
         //public void SkipsGracefullyLoadingOtherFrameworkExtensionAssembly()
@@ -135,7 +95,7 @@ namespace TestCentric.Extensibility
         //    Assume.That(Assembly.GetEntryAssembly(), Is.Not.Null, "Entry assembly is null, framework loading validation will be skipped.");
 
 #if NETCOREAPP
-            //var assemblyName = Path.Combine(GetNetFrameworkSiblingDirectory(), "testcentric.engine.core.tests.exe");
+        //var assemblyName = Path.Combine(GetNetFrameworkSiblingDirectory(), "testcentric.engine.core.tests.exe");
 #else
             //var assemblyName = Path.Combine(GetNetCoreSiblingDirectory(), "testcentric.engine.core.tests.dll");
 #endif

@@ -2,6 +2,7 @@
 // Copyright (c) Charlie Poole and TestCentric contributors.
 // Licensed under the MIT License. See LICENSE file in root directory.
 // ***********************************************************************
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -185,6 +186,32 @@ namespace TestCentric.Extensibility
         {
             log.Info("Scanning {0} assembly for extension points", assembly.GetName().Name);
 
+            foreach (Type type in assembly.GetExportedTypes())
+            {
+                foreach (TypeExtensionPointAttribute attr in type.GetCustomAttributes(typeof(TypeExtensionPointAttribute), false))
+                {
+                    // TODO: This ties the extensibility package too closely to NUnit and should be changed
+                    string path = attr.Path ?? "/NUnit/Engine/TypeExtensions/" + type.Name;
+
+                    if (_pathIndex.ContainsKey(path))
+                    {
+                        string msg = string.Format(
+                            "The Path {0} is already in use for another extension point.",
+                            attr.Path);
+                        throw new NUnitEngineException(msg);
+                    }
+
+                    var ep = new ExtensionPoint(path, type) {
+                        Description = attr.Description,
+                    };
+
+                    _extensionPoints.Add(ep);
+                    _pathIndex.Add(path, ep);
+
+                    log.Info("  Found Path={0}, Type={1}", ep.Path, ep.TypeName);
+                }
+            }
+
             foreach (ExtensionPointAttribute attr in assembly.GetCustomAttributes(typeof(ExtensionPointAttribute), false))
             {
                 if (_pathIndex.ContainsKey(attr.Path))
@@ -204,32 +231,6 @@ namespace TestCentric.Extensibility
                 _pathIndex.Add(ep.Path, ep);
 
                 log.Info("  Found Path={0}, Type={1}", ep.Path, ep.TypeName);
-            }
-
-            foreach (Type type in assembly.GetExportedTypes())
-            {
-                foreach (TypeExtensionPointAttribute attr in type.GetCustomAttributes(typeof(TypeExtensionPointAttribute), false))
-                {
-                    string path = attr.Path ?? "/NUnit/Engine/TypeExtensions/" + type.Name;
-
-                    if (_pathIndex.ContainsKey(path))
-                    {
-                        string msg = string.Format(
-                            "The Path {0} is already in use for another extension point.",
-                            attr.Path);
-                        throw new NUnitEngineException(msg);
-                    }
-
-                    var ep = new ExtensionPoint(path, type)
-                    {
-                        Description = attr.Description,
-                    };
-
-                    _extensionPoints.Add(ep);
-                    _pathIndex.Add(path, ep);
-
-                    log.Info("  Found Path={0}, Type={1}", ep.Path, ep.TypeName);
-                }
             }
         }
 
