@@ -1,0 +1,2 @@
+# Used for unit testing - not part of distriuted package
+testcentric.extensibility.tests.*

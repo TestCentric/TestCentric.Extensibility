@@ -14,6 +14,8 @@ namespace TestCentric.Extensibility
     {
         void Initialize(string startDirectory);
 
+        void Initialize(string startDirectory, string typeExtensionPrefix);
+
         IEnumerable<IExtensionPoint> ExtensionPoints { get; }
 
         IEnumerable<IExtensionNode> Extensions { get; }

@@ -18,6 +18,8 @@ namespace TestCentric.Extensibility
     {
         static Logger log = InternalTrace.GetLogger(typeof(ExtensionManager));
         static readonly Version NUNIT_API_VERSION;
+        const string DEFAULT_TYPE_EXTENSION_PREFIX = "/TestCentric/TypeExtensions/";
+
 
         private readonly List<ExtensionPoint> _extensionPoints = new List<ExtensionPoint>();
         private readonly Dictionary<string, ExtensionPoint> _pathIndex = new Dictionary<string, ExtensionPoint>();
@@ -54,17 +56,22 @@ namespace TestCentric.Extensibility
             _rootAssemblies.AddRange(rootAsemblies);
         }
 
+        public void Initialize(string startDir)
+        {
+            Initialize(startDir, DEFAULT_TYPE_EXTENSION_PREFIX);
+        }
+
         /// <summary>
         /// Initialize this instance of ExtensionManager by finding
         /// all extension points and extensions.
         /// </summary>
         /// <param name="startDir">A DirectoryInfo representing the starting directory for locating extensions</param>
-        public void Initialize(string startDir)
+        public void Initialize(string startDir, string typeExtensionPrefix)
         {
             // Find all extension points
             log.Info("Initializing extension points");
             foreach (var assembly in _rootAssemblies)
-                FindExtensionPoints(assembly);
+                FindExtensionPoints(assembly, typeExtensionPrefix);
 
             // Find all extensions
             FindExtensions(startDir);
@@ -182,7 +189,7 @@ namespace TestCentric.Extensibility
         /// Find the extension points in a loaded assembly.
         /// Public for testing.
         /// </summary>
-        public void FindExtensionPoints(Assembly assembly)
+        public void FindExtensionPoints(Assembly assembly, string typeExtensionPrefix)
         {
             log.Info("Scanning {0} assembly for extension points", assembly.GetName().Name);
 
@@ -191,7 +198,7 @@ namespace TestCentric.Extensibility
                 foreach (TypeExtensionPointAttribute attr in type.GetCustomAttributes(typeof(TypeExtensionPointAttribute), false))
                 {
                     // TODO: This ties the extensibility package too closely to NUnit and should be changed
-                    string path = attr.Path ?? "/NUnit/Engine/TypeExtensions/" + type.Name;
+                    string path = attr.Path ?? typeExtensionPrefix + type.Name;
 
                     if (_pathIndex.ContainsKey(path))
                     {

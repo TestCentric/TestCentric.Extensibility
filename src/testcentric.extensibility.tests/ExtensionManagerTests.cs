@@ -15,6 +15,7 @@ namespace TestCentric.Extensibility
     public class ExtensionManagerTests
     {
         private static readonly Assembly THIS_ASSEMBLY = typeof(ExtensionManagerTests).Assembly;
+        private static readonly string THIS_ASSEMBLY_DIRECTORY = Path.GetDirectoryName(THIS_ASSEMBLY.Location);
         private static readonly ExtensionManagerTestData[] Examples = ExtensionManagerTestData.Examples;
 
         private ExtensionManager _extensionManager;
@@ -22,17 +23,21 @@ namespace TestCentric.Extensibility
         [SetUp]
         public void CreateManager()
         {
-            _extensionManager = new ExtensionManager();
-
-            // Setup manager to use dummy extension points and extensions in this assembly.
-            _extensionManager.FindExtensionPoints(THIS_ASSEMBLY);
-            _extensionManager.FindExtensionsInAssembly(new ExtensionAssembly(THIS_ASSEMBLY.Location, false));
+            _extensionManager = new ExtensionManager(THIS_ASSEMBLY);
+            var args = TestContext.CurrentContext.Test.Arguments;
+            string prefix = args.Length == 0
+                ? null
+                : (args[0] as ExtensionManagerTestData)?.Prefix;
+            if (prefix == null)
+                _extensionManager.Initialize(THIS_ASSEMBLY_DIRECTORY);
+            else
+                _extensionManager.Initialize(THIS_ASSEMBLY_DIRECTORY, prefix);
         }
 
         [Test]
         public void AllExtensionPointsAreKnown()
         {
-            Assert.That(_extensionManager.ExtensionPoints.Select(ep => ep.Path), Is.EquivalentTo(Examples.Select(d => d.Path))) ;
+            Assert.That(_extensionManager.ExtensionPoints.Select(ep => ep.Path), Is.EquivalentTo(Examples.Where(d => d.Prefix == null).Select(d => d.Path))) ;
         }
 
         [TestCaseSource(nameof(Examples))]

@@ -46,12 +46,14 @@ namespace TestCentric.Extensibility
 
     public class ExtensionManagerTestData
     {
+        public string Prefix;
         public string Path;
         public Type ExtensionPointType;
         public Type ExtensionType;
 
-        public ExtensionManagerTestData(string path, Type type, Type extension)
+        public ExtensionManagerTestData(string prefix, string path, Type type, Type extension)
         {
+            Prefix = prefix;
             Path = path;
             ExtensionPointType = type;
             ExtensionType = extension;
@@ -59,16 +61,19 @@ namespace TestCentric.Extensibility
 
         public override string ToString()
         {
-            return $"Path=\"{Path}\", ExtensionPointType={ExtensionPointType.Name}, ExtensionType = {ExtensionType.Name}";
+            return $"Prefix={Prefix ?? "<null>"} Path=\"{Path}\", ExtensionPointType={ExtensionPointType.Name}, ExtensionType = {ExtensionType.Name}";
         }
 
         public static readonly ExtensionManagerTestData[] Examples = new ExtensionManagerTestData[]
         {
-            new ExtensionManagerTestData("/NUnit/Engine/TypeExtensions/IDoSomething", typeof(IDoSomething), typeof(DoesSomething)),
-            new ExtensionManagerTestData("/NUnit/Engine/TypeExtensions/IDoSomethingElse", typeof(IDoSomethingElse), typeof(DoesSomethingElse)),
-            new ExtensionManagerTestData("/NUnit/Engine/TypeExtensions/IDoYetAnotherThing", typeof(IDoYetAnotherThing), typeof(DoesYetAnotherThing)),
-            new ExtensionManagerTestData("/TestCentric/DoesSomething", typeof(IDoSomething), typeof(DoesSomething))
-
+            new ExtensionManagerTestData(null, "/TestCentric/TypeExtensions/IDoSomething", typeof(IDoSomething), typeof(DoesSomething)),
+            new ExtensionManagerTestData(null, "/TestCentric/TypeExtensions/IDoSomethingElse", typeof(IDoSomethingElse), typeof(DoesSomethingElse)),
+            new ExtensionManagerTestData(null, "/TestCentric/TypeExtensions/IDoYetAnotherThing", typeof(IDoYetAnotherThing), typeof(DoesYetAnotherThing)),
+            new ExtensionManagerTestData(null, "/TestCentric/DoesSomething", typeof(IDoSomething), typeof(DoesSomething)),
+            new ExtensionManagerTestData("/TestCentric/Engine/TypeExtensions/", "/TestCentric/Engine/TypeExtensions/IDoSomething", typeof(IDoSomething), typeof(DoesSomething)),
+            new ExtensionManagerTestData("/TestCentric/Engine/TypeExtensions/", "/TestCentric/Engine/TypeExtensions/IDoSomethingElse", typeof(IDoSomethingElse), typeof(DoesSomethingElse)),
+            new ExtensionManagerTestData("/TestCentric/Engine/TypeExtensions/", "/TestCentric/Engine/TypeExtensions/IDoYetAnotherThing", typeof(IDoYetAnotherThing), typeof(DoesYetAnotherThing)),
+            new ExtensionManagerTestData("/TestCentric/Engine/TypeExtensions/", "/TestCentric/DoesSomething", typeof(IDoSomething), typeof(DoesSomething))
         };
     }
 }
