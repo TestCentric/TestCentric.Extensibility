@@ -43,11 +43,11 @@ Generated\ Files/
 [Tt]est[Rr]esult*/
 [Bb]uild[Ll]og.*
 
-# NUnit
+# TestCentric
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
-package/
+packaging/
 
 # Build Results of an ATL Project
 [Dd]ebugPS/
