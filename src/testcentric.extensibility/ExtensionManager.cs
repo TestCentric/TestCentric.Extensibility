@@ -11,6 +11,7 @@ using System.Reflection;
 using TestCentric.Metadata;
 using NUnit.Engine;
 using NUnit.Engine.Extensibility;
+using System.Reflection.Emit;
 
 namespace TestCentric.Extensibility
 {
@@ -424,15 +425,36 @@ namespace TestCentric.Extensibility
 
                 log.Info($"ExtensionAttribute found on {type.Name}");
 
-                object versionArg = extensionAttr.GetNamedArgument("EngineVersion");
+                string versionArg = extensionAttr.GetNamedArgument("EngineVersion") as string;
                 if (versionArg != null)
                 {
-                    var requiredVersion = new Version((string)versionArg);
+                    int dash = versionArg.IndexOf('-');
+
+                    Version requiredVersion = dash > 0 ? new Version(versionArg.Substring(0, dash)) : new Version(versionArg);
                     if (requiredVersion > NUNIT_API_VERSION)
                     {
                         log.Warning($"  Ignoring {type.Name} because it requires NUnit {requiredVersion} API");
                         continue;
                     }
+
+                    // TODO: Need to specify pre-release suffix for the engine in some way
+                    // and then compare here appropriately. For now, no action so any suffix
+                    // is actually ignored.
+
+#if false
+                    // Partial code as there's nothing to compare suffix to
+                    if (requiredVersion == NUNIT_API_VERSION && dash > 0)
+                    {
+                        string suffix = versionArg.Substring(dash + 1);
+                        string label = "";
+                        foreach (char c in suffix)
+                        {
+                            if (!char.IsLetter(c))
+                                break;
+                            label += c;
+                        }
+                    }
+#endif
                 }
 
                 var node = new ExtensionNode(assembly.FilePath, assembly.AssemblyVersion, type.FullName, assemblyTargetFramework);
