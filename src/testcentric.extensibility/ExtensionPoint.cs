@@ -70,7 +70,7 @@ namespace TestCentric.Extensibility
             if (node.Path != Path)
             {
                 string msg = string.Format("Non-matching extension path. Expected {0} but got {1}.", Path, node.Path);
-                throw new NUnitEngineException(msg);
+                throw new Exception(msg);
             }
 
             // TODO: Verify that the type is correct using Cecil or Reflection

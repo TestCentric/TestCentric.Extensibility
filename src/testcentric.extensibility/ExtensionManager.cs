@@ -69,6 +69,7 @@ namespace TestCentric.Extensibility
         /// <param name="startDir">A DirectoryInfo representing the starting directory for locating extensions</param>
         public void Initialize(string startDir, string typeExtensionPrefix)
         {
+            // TODO: Find Callers expecting NUnitEngineException
             // Find all extension points
             log.Info("Initializing extension points");
             foreach (var assembly in _rootAssemblies)
@@ -188,9 +189,8 @@ namespace TestCentric.Extensibility
 
         /// <summary>
         /// Find the extension points in a loaded assembly.
-        /// Public for testing.
         /// </summary>
-        public void FindExtensionPoints(Assembly assembly, string typeExtensionPrefix)
+        internal void FindExtensionPoints(Assembly assembly, string typeExtensionPrefix)
         {
             log.Info("Scanning {0} assembly for extension points", assembly.GetName().Name);
 
@@ -202,12 +202,7 @@ namespace TestCentric.Extensibility
                     string path = attr.Path ?? typeExtensionPrefix + type.Name;
 
                     if (_pathIndex.ContainsKey(path))
-                    {
-                        string msg = string.Format(
-                            "The Path {0} is already in use for another extension point.",
-                            attr.Path);
-                        throw new NUnitEngineException(msg);
-                    }
+                        throw new Exception($"The Path {attr.Path} is already in use for another extension point.");
 
                     var ep = new ExtensionPoint(path, type) {
                         Description = attr.Description,
@@ -223,12 +218,7 @@ namespace TestCentric.Extensibility
             foreach (ExtensionPointAttribute attr in assembly.GetCustomAttributes(typeof(ExtensionPointAttribute), false))
             {
                 if (_pathIndex.ContainsKey(attr.Path))
-                {
-                    string msg = string.Format(
-                        "The Path {0} is already in use for another extension point.",
-                        attr.Path);
-                    throw new NUnitEngineException(msg);
-                }
+                    throw new Exception($"The Path {attr.Path} is already in use for another extension point.");
 
                 var ep = new ExtensionPoint(attr.Path, attr.Type)
                 {
@@ -373,9 +363,9 @@ namespace TestCentric.Extensibility
                 catch (BadImageFormatException e)
                 {
                     if (!fromWildCard)
-                        throw new NUnitEngineException(String.Format("Specified extension {0} could not be read", filePath), e);
+                        throw new Exception($"Specified extension {filePath} could not be read", e);
                 }
-                catch (NUnitEngineException)
+                catch (Exception)
                 {
                     if (!fromWildCard)
                         throw;
@@ -485,14 +475,7 @@ namespace TestCentric.Extensibility
                 {
                     ep = DeduceExtensionPointFromType(type);
                     if (ep == null)
-                    {
-                        if (assembly.FromWildCard) return;
-
-                        string msg = string.Format(
-                            "Unable to deduce ExtensionPoint for Type {0}. Specify Path on ExtensionAttribute to resolve.",
-                            type.FullName);
-                        throw new NUnitEngineException(msg);
-                    }
+                        throw new Exception($"Unable to deduce ExtensionPoint for Type {type.FullName}. Specify Path on ExtensionAttribute to resolve.");
 
                     node.Path = ep.Path;
                 }
@@ -504,11 +487,7 @@ namespace TestCentric.Extensibility
                     {
                         if (assembly.FromWildCard) return;
 
-                        string msg = string.Format(
-                            "Unable to locate ExtensionPoint for Type {0}. The Path {1} cannot be found.",
-                            type.FullName,
-                            node.Path);
-                        throw new NUnitEngineException(msg);
+                        throw new Exception($"Unable to locate ExtensionPoint for Type {type.FullName}. The Path {node.Path} cannot be found.");
                     }
                 }
 
@@ -532,7 +511,7 @@ namespace TestCentric.Extensibility
             var runnerFrameworkName = AssemblyDefinition.ReadAssembly(runnerAsm.Location).GetFrameworkName();
             if (runnerFrameworkName?.StartsWith(".NETStandard") == true)
             {
-                throw new NUnitEngineException($"{runnerAsm.FullName} test runner must target .NET Core or .NET Framework, not .NET Standard");
+                throw new Exception($"{runnerAsm.FullName} test runner must target .NET Core or .NET Framework, not .NET Standard");
             }
             else if (runnerFrameworkName?.StartsWith(".NETCoreApp") == true)
             {
