@@ -14,7 +14,7 @@ namespace TestCentric.Extensibility
     /// An ExtensionPoint represents a single point in the TestEngine
     /// that may be extended by user addins and extensions.
     /// </summary>
-    internal class ExtensionPoint : IExtensionPoint
+    public class ExtensionPoint : IExtensionPoint
     {
         /// <summary>
         /// Construct an ExtensionPoint

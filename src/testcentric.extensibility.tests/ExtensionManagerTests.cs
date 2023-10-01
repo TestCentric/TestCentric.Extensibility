@@ -12,6 +12,8 @@ using NUnit.Framework;
 
 namespace TestCentric.Extensibility
 {
+    [TestFixture(null)]
+    [TestFixture("/TestCentric/Engine/TypeExtensions/")]
     public class ExtensionManagerTests
     {
         private static readonly Assembly THIS_ASSEMBLY = typeof(ExtensionManagerTests).Assembly;
@@ -20,62 +22,96 @@ namespace TestCentric.Extensibility
 
         private ExtensionManager _extensionManager;
 
-        [SetUp]
+        public ExtensionManagerTests(string prefix)
+        {
+            PrefixWasProvided = prefix != null;
+            Prefix = PrefixWasProvided ? prefix : "/TestCentric/TypeExtensions/";
+        }
+
+        string Prefix { get; set; }
+        bool PrefixWasProvided { get; set; }
+
+        IEnumerable<ExtensionPoint> ExpectedExtensionPoints
+        {
+            get
+            {
+                yield return new ExtensionPoint(Prefix + "IDoSomething", typeof(IDoSomething));
+                yield return new ExtensionPoint(Prefix + "IDoSomethingElse", typeof(IDoSomethingElse));
+                yield return new ExtensionPoint(Prefix + "IDoYetAnotherThing", typeof(IDoYetAnotherThing));
+                yield return new ExtensionPoint("/TestCentric/DoesSomething", typeof(IDoSomething));
+            }
+        }
+
+        [OneTimeSetUp]
         public void CreateManager()
         {
             _extensionManager = new ExtensionManager(THIS_ASSEMBLY);
-            var args = TestContext.CurrentContext.Test.Arguments;
-            string prefix = args.Length == 0
-                ? null
-                : (args[0] as ExtensionManagerTestData)?.Prefix;
-            if (prefix == null)
-                _extensionManager.Initialize(THIS_ASSEMBLY_DIRECTORY);
+            if (PrefixWasProvided)
+                _extensionManager.Initialize(THIS_ASSEMBLY_DIRECTORY, Prefix);
             else
-                _extensionManager.Initialize(THIS_ASSEMBLY_DIRECTORY, prefix);
+                _extensionManager.Initialize(THIS_ASSEMBLY_DIRECTORY);
         }
 
         [Test]
         public void AllExtensionPointsAreKnown()
         {
-            Assert.That(_extensionManager.ExtensionPoints.Select(ep => ep.Path), Is.EquivalentTo(Examples.Where(d => d.Prefix == null).Select(d => d.Path))) ;
+            Assert.That(_extensionManager.ExtensionPoints.Select(ep => ep.Path), Is.EquivalentTo(ExpectedExtensionPoints.Select(ep => ep.Path))) ;
         }
 
-        [TestCaseSource(nameof(Examples))]
-        public void CanGetExtensionPointByPath(ExtensionManagerTestData data)
+        [TestCase(nameof(IDoSomething), typeof(IDoSomething))]
+        [TestCase(nameof(IDoSomethingElse), typeof(IDoSomethingElse))]
+        [TestCase(nameof(IDoYetAnotherThing), typeof(IDoYetAnotherThing))]
+        [TestCase("/TestCentric/DoesSomething", typeof(IDoSomething))]
+        public void CanGetExtensionPointByPath(string path, Type type)
         {
-            var ep = _extensionManager.GetExtensionPoint(data.Path);
-            Assert.NotNull(ep);
-            Assert.That(ep.Path, Is.EqualTo(data.Path));
-            Assert.That(ep.TypeName, Is.EqualTo(data.ExtensionPointType.FullName));
-        }
+            if (path[0] != '/') path = Prefix + path;
 
-        [TestCaseSource(nameof(Examples))]
-        public void CanGetExtensionPointByType(ExtensionManagerTestData data)
-        {
-            // Can't look up assembly attribtue specified path
-            Assume.That(data.Path != "/TestCentric/DoesSomething");
-
-            var ep = _extensionManager.GetExtensionPoint(data.ExtensionPointType);
-            Assert.NotNull(ep);
-            Assert.That(ep.Path, Is.EqualTo(data.Path));
-            Assert.That(ep.TypeName, Is.EqualTo(data.ExtensionPointType.FullName));
-        }
-
-        [TestCaseSource(nameof(Examples))]
-        public void CanListExtensions(ExtensionManagerTestData data)
-        {
-            Assert.That(_extensionManager.Extensions,
-                Has.Some.Property(nameof(ExtensionNode.TypeName)).EqualTo(data.ExtensionType.FullName));
-        }
-
-        [TestCaseSource(nameof(Examples))]
-        public void ExtensionsAreAddedToExtensionPoint(ExtensionManagerTestData data)
-        {
-            var nodes = _extensionManager.Extensions.Where(n => n.TypeName == data.ExtensionType.FullName);
-            Assert.That(nodes.Count, Is.EqualTo(1)); // Count of 1 is particular to our test setup
+            var ep = _extensionManager.GetExtensionPoint(path);
+            Assert.NotNull(ep, "Unable to get ExtensionPoint");
+            Assert.That(ep.Path, Is.EqualTo(path));
+            Assert.That(ep.TypeName, Is.EqualTo(type.FullName));
         }
 
         [Test]
+        public void UnknownExtensionPathReturnsNull()
+        {
+            Assert.That(_extensionManager.GetExtensionPoint("Path/Does/Not/Exist"), Is.Null);
+        }
+
+        [TestCase(nameof(IDoSomething), typeof(IDoSomething))]
+        [TestCase(nameof(IDoSomethingElse), typeof(IDoSomethingElse))]
+        [TestCase(nameof(IDoYetAnotherThing), typeof(IDoYetAnotherThing))]
+        public void CanGetExtensionPointByType(string path, Type type)
+        {
+            if (path[0] != '/') path = Prefix + path;
+
+            var ep = _extensionManager.GetExtensionPoint(type);
+            Assert.NotNull(ep);
+            Assert.That(ep.Path, Is.EqualTo(path));
+            Assert.That(ep.TypeName, Is.EqualTo(type.FullName));
+        }
+
+        [Test]
+        public void UnknownExtensionTypeReturnsNull()
+        {
+            Assert.That(_extensionManager.GetExtensionPoint(typeof(ThisIsNotAnExtensionPoint)), Is.Null);
+        }
+
+        class ThisIsNotAnExtensionPoint { }
+
+        [TestCase(typeof(DoesSomething))]
+        [TestCase(typeof(DoesSomething2))]
+        [TestCase(typeof(DoesSomethingElse))]
+        [TestCase(typeof(DoesYetAnotherThing))]
+        public void AllExtensionsAreKnown(Type type)
+        {
+            // Note: Our data is set up so each extension is used only once
+            var node = _extensionManager.Extensions.Where(n => n.TypeName == type.FullName).First();
+            Assert.That(node, Is.Not.Null);
+            Assert.That(node.TypeName, Is.EqualTo(type.FullName));
+        }
+
+        [Test, Order(1)]
         public void ExtensionMayBeDisabledByDefault()
         {
             Assert.That(_extensionManager.Extensions,
