@@ -50,60 +50,38 @@ namespace TestCentric.Extensibility
             }
         }
 
-        public ExtensionManager(IList<Assembly> rootAssemblies, string typeExtensionPrefix = DEFAULT_TYPE_EXTENSION_PREFIX)
-        {
-            RootAssemblies = rootAssemblies;
-            TypeExtensionPrefix = typeExtensionPrefix;
-
-            log.Info("Initializing extension points");
-            foreach (var assembly in RootAssemblies)
-                FindExtensionPoints(assembly, TypeExtensionPrefix);
-        }
-
         public ExtensionManager(params Assembly[] rootAssemblies)
-            : this(rootAssemblies, DEFAULT_TYPE_EXTENSION_PREFIX) { }
-
-        private IList<Assembly> RootAssemblies { get; set; }
-        private string TypeExtensionPrefix { get; set; }
-
-        //public void Initialize(string startDir)
-        //{
-        //    Initialize(startDir, DEFAULT_TYPE_EXTENSION_PREFIX);
-        //}
-
-        ///// <summary>
-        ///// Initialize this instance of ExtensionManager by finding
-        ///// all extension points and extensions.
-        ///// </summary>
-        ///// <param name="startDir">A DirectoryInfo representing the starting directory for locating extensions</param>
-        //public void Initialize(string startDir, string typeExtensionPrefix)
-        //{
-        //    // TODO: Find Callers expecting NUnitEngineException
-        //    // Find all extension points
-
-        //    // Find all extensions
-        //    FindExtensions(startDir);
-        //}
-
-        public void FindExtensions(string startDir)
         {
-            // Find potential extension assemblies
-            log.Info("Locating potential extension assemblies starting at " + startDir);
-            ProcessAddinsFiles(new DirectoryInfo(startDir), false);
+            Guard.ArgumentNotNull(rootAssemblies, nameof(rootAssemblies));
+            Guard.ArgumentValid(rootAssemblies.Length > 0, "Must be a non-empty array", nameof(rootAssemblies));
 
-            // Check each assembly to see if it contains extensions
-            log.Info($"Searching for extensions compatible with NUnit {NUNIT_API_VERSION} API");
-            foreach (var candidate in _extensionAssemblies)
-                FindExtensionsInAssembly(candidate);
+            RootAssemblies = rootAssemblies;
+
+            // Set default property values - may be changed before Initialization
+            DefaultTypeExtensionPrefix = DEFAULT_TYPE_EXTENSION_PREFIX;
+            InitialAddinsDirectory = Path.GetDirectoryName(RootAssemblies[0].Location);
         }
-
-        public InternalTraceLevel InternalTraceLevel { get; set; }
-
-        public string WorkDirectory { get; set; }
 
         #endregion
 
         #region IExtensionService Implementation
+
+        #region Properties
+
+        /// <summary>
+        /// Array of assemblies whose ExtensionPoints are to be manaaged.
+        /// </summary>
+        public IList<Assembly> RootAssemblies { get; private set; }
+
+        /// <summary>
+        /// Prefix used if the Path is not specified for a TypeExtensionPoint
+        /// </summary>
+        public string DefaultTypeExtensionPrefix { get; set; }
+
+        /// <summary>
+        /// Directory containing the initial .addins files used to locate extensions
+        /// </summary>
+        public string InitialAddinsDirectory { get; set; }
 
         /// <summary>
         /// Gets an enumeration of all ExtensionPoints in the engine.
@@ -116,9 +94,41 @@ namespace TestCentric.Extensibility
         /// <summary>
         /// Gets an enumeration of all installed Extensions.
         /// </summary>
-        public IEnumerable<IExtensionNode> Extensions
-        {
+        public IEnumerable<IExtensionNode> Extensions {
             get { return _extensions.ToArray(); }
+        }
+
+        #endregion
+
+        #region Methods
+
+        /// <summary>
+        /// Initialize this instance of ExtensionManager by finding
+        /// all extension points and extensions.
+        /// </summary>
+        public void Initialize()
+        {
+            // TODO: Find Callers expecting NUnitEngineException
+
+            // Find all extension points
+            log.Info("Initializing extension points");
+            foreach (var assembly in RootAssemblies)
+                FindExtensionPoints(assembly, DefaultTypeExtensionPrefix);
+
+            // Find all extensions
+            FindExtensions(InitialAddinsDirectory);
+        }
+
+        void FindExtensions(string startDir)
+        {
+            // Find potential extension assemblies
+            log.Info("Locating potential extension assemblies starting at " + startDir);
+            ProcessAddinsFiles(new DirectoryInfo(startDir), false);
+
+            // Check each assembly to see if it contains extensions
+            log.Info($"Searching for extensions compatible with NUnit {NUNIT_API_VERSION} API");
+            foreach (var candidate in _extensionAssemblies)
+                FindExtensionsInAssembly(candidate);
         }
 
         public IExtensionPoint GetExtensionPoint(string path)
@@ -152,6 +162,8 @@ namespace TestCentric.Extensibility
                 if (node.TypeName == typeName)
                     node.Enabled = enabled;
         }
+
+        #endregion
 
         #endregion
 

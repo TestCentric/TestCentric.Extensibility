@@ -5,6 +5,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Text;
 using NUnit.Engine.Extensibility;
 
@@ -12,11 +13,42 @@ namespace TestCentric.Extensibility
 {
     public interface IExtensionManager
     {
-        void FindExtensions(string startDirectory);
+        #region Properties
 
+        /// <summary>
+        /// Array of assemblies whose ExtensionPoints are manaaged by this instance.
+        /// </summary>
+        IList<Assembly> RootAssemblies { get; }
+
+        /// <summary>
+        /// Prefix used if the Path is not specified for a TypeExtensionPoint
+        /// </summary>
+        string DefaultTypeExtensionPrefix { get; set; }
+
+        /// <summary>
+        /// Directory containing the initial .addins files used to locate extensions
+        /// </summary>
+        string InitialAddinsDirectory { get; set; }
+
+        /// <summary>
+        /// Gets an enumeration of all ExtensionPoints in the engine.
+        /// </summary>
         IEnumerable<IExtensionPoint> ExtensionPoints { get; }
 
+        /// <summary>
+        /// Gets an enumeration of all installed Extensions.
+        /// </summary>
         IEnumerable<IExtensionNode> Extensions { get; }
+
+        #endregion
+
+        #region Methods
+
+        /// <summary>
+        /// Initialize this instance of ExtensionManager by finding
+        /// all extension points and extensions.
+        /// </summary>
+        void Initialize();
 
         IExtensionPoint GetExtensionPoint(string path);
 
@@ -27,5 +59,7 @@ namespace TestCentric.Extensibility
         IEnumerable<ExtensionNode> GetExtensionNodes<T>(bool includeDisabled = false);
 
         void EnableExtension(string typeName, bool enabled);
+
+        #endregion
     }
 }
