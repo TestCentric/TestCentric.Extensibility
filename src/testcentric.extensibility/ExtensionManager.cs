@@ -28,8 +28,6 @@ namespace TestCentric.Extensibility
         private readonly List<ExtensionNode> _extensions = new List<ExtensionNode>();
         private readonly List<ExtensionAssembly> _extensionAssemblies = new List<ExtensionAssembly>();
 
-        private readonly List<Assembly> _rootAssemblies = new List<Assembly>();
-
         #region Construction and Initialization
 
         static ExtensionManager()
@@ -52,34 +50,42 @@ namespace TestCentric.Extensibility
             }
         }
 
-        public ExtensionManager(params Assembly[] rootAsemblies)
+        public ExtensionManager(IList<Assembly> rootAssemblies, string typeExtensionPrefix = DEFAULT_TYPE_EXTENSION_PREFIX)
         {
-            _rootAssemblies.AddRange(rootAsemblies);
-        }
+            RootAssemblies = rootAssemblies;
+            TypeExtensionPrefix = typeExtensionPrefix;
 
-        public void Initialize(string startDir)
-        {
-            Initialize(startDir, DEFAULT_TYPE_EXTENSION_PREFIX);
-        }
-
-        /// <summary>
-        /// Initialize this instance of ExtensionManager by finding
-        /// all extension points and extensions.
-        /// </summary>
-        /// <param name="startDir">A DirectoryInfo representing the starting directory for locating extensions</param>
-        public void Initialize(string startDir, string typeExtensionPrefix)
-        {
-            // TODO: Find Callers expecting NUnitEngineException
-            // Find all extension points
             log.Info("Initializing extension points");
-            foreach (var assembly in _rootAssemblies)
-                FindExtensionPoints(assembly, typeExtensionPrefix);
-
-            // Find all extensions
-            FindExtensions(startDir);
+            foreach (var assembly in RootAssemblies)
+                FindExtensionPoints(assembly, TypeExtensionPrefix);
         }
 
-        private void FindExtensions(string startDir)
+        public ExtensionManager(params Assembly[] rootAssemblies)
+            : this(rootAssemblies, DEFAULT_TYPE_EXTENSION_PREFIX) { }
+
+        private IList<Assembly> RootAssemblies { get; set; }
+        private string TypeExtensionPrefix { get; set; }
+
+        //public void Initialize(string startDir)
+        //{
+        //    Initialize(startDir, DEFAULT_TYPE_EXTENSION_PREFIX);
+        //}
+
+        ///// <summary>
+        ///// Initialize this instance of ExtensionManager by finding
+        ///// all extension points and extensions.
+        ///// </summary>
+        ///// <param name="startDir">A DirectoryInfo representing the starting directory for locating extensions</param>
+        //public void Initialize(string startDir, string typeExtensionPrefix)
+        //{
+        //    // TODO: Find Callers expecting NUnitEngineException
+        //    // Find all extension points
+
+        //    // Find all extensions
+        //    FindExtensions(startDir);
+        //}
+
+        public void FindExtensions(string startDir)
         {
             // Find potential extension assemblies
             log.Info("Locating potential extension assemblies starting at " + startDir);

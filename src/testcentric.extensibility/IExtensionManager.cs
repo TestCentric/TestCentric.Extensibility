@@ -12,9 +12,7 @@ namespace TestCentric.Extensibility
 {
     public interface IExtensionManager
     {
-        void Initialize(string startDirectory);
-
-        void Initialize(string startDirectory, string typeExtensionPrefix);
+        void FindExtensions(string startDirectory);
 
         IEnumerable<IExtensionPoint> ExtensionPoints { get; }
 

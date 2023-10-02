@@ -45,11 +45,11 @@ namespace TestCentric.Extensibility
         [OneTimeSetUp]
         public void CreateManager()
         {
-            _extensionManager = new ExtensionManager(THIS_ASSEMBLY);
-            if (PrefixWasProvided)
-                _extensionManager.Initialize(THIS_ASSEMBLY_DIRECTORY, Prefix);
-            else
-                _extensionManager.Initialize(THIS_ASSEMBLY_DIRECTORY);
+            _extensionManager = PrefixWasProvided
+                ? new ExtensionManager(new[] { THIS_ASSEMBLY }, Prefix)
+                : new ExtensionManager(THIS_ASSEMBLY);
+
+            _extensionManager.FindExtensions(THIS_ASSEMBLY_DIRECTORY);
         }
 
         [Test]
@@ -111,6 +111,7 @@ namespace TestCentric.Extensibility
             Assert.That(node.TypeName, Is.EqualTo(type.FullName));
         }
 
+        // Run this first as subsequent test will enable the extension
         [Test, Order(1)]
         public void ExtensionMayBeDisabledByDefault()
         {
