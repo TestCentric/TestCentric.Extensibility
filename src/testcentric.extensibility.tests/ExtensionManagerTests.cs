@@ -17,7 +17,6 @@ namespace TestCentric.Extensibility
     public class ExtensionManagerTests
     {
         private static readonly Assembly THIS_ASSEMBLY = typeof(ExtensionManagerTests).Assembly;
-        private static readonly string THIS_ASSEMBLY_DIRECTORY = Path.GetDirectoryName(THIS_ASSEMBLY.Location);
         private static readonly ExtensionManagerTestData[] Examples = ExtensionManagerTestData.Examples;
 
         private ExtensionManager _extensionManager;
@@ -45,11 +44,12 @@ namespace TestCentric.Extensibility
         [OneTimeSetUp]
         public void CreateManager()
         {
-            _extensionManager = PrefixWasProvided
-                ? new ExtensionManager(new[] { THIS_ASSEMBLY }, Prefix)
-                : new ExtensionManager(THIS_ASSEMBLY);
+            _extensionManager = new ExtensionManager(THIS_ASSEMBLY);
 
-            _extensionManager.FindExtensions(THIS_ASSEMBLY_DIRECTORY);
+            if (PrefixWasProvided)
+                _extensionManager.DefaultTypeExtensionPrefix = Prefix;
+
+            _extensionManager.Initialize();
         }
 
         [Test]
