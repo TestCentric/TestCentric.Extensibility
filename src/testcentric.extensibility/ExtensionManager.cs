@@ -5,20 +5,17 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using TestCentric.Metadata;
 using NUnit.Engine;
 using NUnit.Engine.Extensibility;
-using System.Reflection.Emit;
 
 namespace TestCentric.Extensibility
 {
     public class ExtensionManager : IExtensionManager
     {
         static Logger log = InternalTrace.GetLogger(typeof(ExtensionManager));
-        static readonly Version NUNIT_API_VERSION;
         const string DEFAULT_TYPE_EXTENSION_PREFIX = "/TestCentric/TypeExtensions/";
 
 
@@ -29,26 +26,6 @@ namespace TestCentric.Extensibility
         private readonly List<ExtensionAssembly> _extensionAssemblies = new List<ExtensionAssembly>();
 
         #region Construction and Initialization
-
-        static ExtensionManager()
-        {
-            // Default - in case no attribute is found
-            NUNIT_API_VERSION = new Version(3, 16, 2);
-
-            var nunitApiAssembly = typeof(IExtensionService).Assembly;
-            log.Debug($"  Using API Assembly {nunitApiAssembly.GetName().FullName}");
-            var attrs = nunitApiAssembly.GetCustomAttributes(typeof(AssemblyInformationalVersionAttribute), false);
-
-            if (attrs.Length > 0)
-            {
-                var attr = attrs[0] as AssemblyInformationalVersionAttribute;
-                string version = attr.InformationalVersion;
-                int dash = version.IndexOf('-');
-                if (dash > 0)
-                    version = version.Substring(0, dash);
-                NUNIT_API_VERSION = new Version(version);
-            }
-        }
 
         public ExtensionManager(params Assembly[] rootAssemblies)
         {
@@ -111,7 +88,7 @@ namespace TestCentric.Extensibility
             // TODO: Find Callers expecting NUnitEngineException
 
             // Find all extension points
-            log.Info("Initializing extension points");
+            log.Info("Initializing ExtensionPoints...");
             foreach (var assembly in RootAssemblies)
                 FindExtensionPoints(assembly, DefaultTypeExtensionPrefix);
 
@@ -122,18 +99,18 @@ namespace TestCentric.Extensibility
         void FindExtensions(string startDir)
         {
             // Find potential extension assemblies
-            log.Info("Locating potential extension assemblies starting at " + startDir);
+            log.Info("Initializing Extensions...");
+            log.Info($"  Start Directory: {startDir}");
             ProcessAddinsFiles(new DirectoryInfo(startDir), false);
 
             // Check each assembly to see if it contains extensions
-            log.Info($"Searching for extensions compatible with NUnit {NUNIT_API_VERSION} API");
             foreach (var candidate in _extensionAssemblies)
                 FindExtensionsInAssembly(candidate);
         }
 
-        public IExtensionPoint GetExtensionPoint(string path)
+        IExtensionPoint IExtensionManager.GetExtensionPoint(string path)
         {
-            return _pathIndex.ContainsKey(path) ? _pathIndex[path] : null;
+            return this.GetExtensionPoint(path);
         }
 
         public IEnumerable<IExtensionNode> GetExtensionNodes(string path)
@@ -166,6 +143,11 @@ namespace TestCentric.Extensibility
         #endregion
 
         #endregion
+
+        public ExtensionPoint GetExtensionPoint(string path)
+        {
+            return _pathIndex.ContainsKey(path) ? _pathIndex[path] : null;
+        }
 
         /// <summary>
         /// Get an ExtensionPoint based on the required Type for extensions.
@@ -210,7 +192,9 @@ namespace TestCentric.Extensibility
         /// </summary>
         internal void FindExtensionPoints(Assembly assembly, string typeExtensionPrefix)
         {
-            log.Info("Scanning {0} assembly for extension points", assembly.GetName().Name);
+            AssemblyName assemblyName = assembly.GetName();
+
+            log.Info($"Assembly: {assemblyName.Name}");
 
             foreach (Type type in assembly.GetExportedTypes())
             {
@@ -224,12 +208,13 @@ namespace TestCentric.Extensibility
 
                     var ep = new ExtensionPoint(path, type) {
                         Description = attr.Description,
+                        AssemblyName = assemblyName
                     };
 
                     _extensionPoints.Add(ep);
                     _pathIndex.Add(path, ep);
 
-                    log.Info("  Found Path={0}, Type={1}", ep.Path, ep.TypeName);
+                    log.Info($"  Found Path={ep.Path}, Type={ep.TypeName}");
                 }
             }
 
@@ -238,15 +223,15 @@ namespace TestCentric.Extensibility
                 if (_pathIndex.ContainsKey(attr.Path))
                     throw new Exception($"The Path {attr.Path} is already in use for another extension point.");
 
-                var ep = new ExtensionPoint(attr.Path, attr.Type)
-                {
+                var ep = new ExtensionPoint(attr.Path, attr.Type) {
                     Description = attr.Description,
+                    AssemblyName = assemblyName
                 };
 
                 _extensionPoints.Add(ep);
                 _pathIndex.Add(ep.Path, ep);
 
-                log.Info("  Found Path={0}, Type={1}", ep.Path, ep.TypeName);
+                log.Info($"  Found Path={ep.Path}, Type={ep.TypeName}");
             }
         }
 
@@ -257,8 +242,6 @@ namespace TestCentric.Extensibility
         /// </summary>
         private ExtensionPoint DeduceExtensionPointFromType(TypeReference typeRef)
         {
-            log.Debug($"Trying to deduce ExtensionPoint from {typeRef.Name}");
-
             var ep = GetExtensionPoint(typeRef);
             if (ep != null)
                 return ep;
@@ -268,7 +251,6 @@ namespace TestCentric.Extensibility
 
             foreach (InterfaceImplementation iface in typeDef.Interfaces)
             {
-                log.Debug($"Trying {iface.InterfaceType.Name}");
                 ep = DeduceExtensionPointFromType(iface.InterfaceType);
                 if (ep != null)
                     return ep;
@@ -316,7 +298,7 @@ namespace TestCentric.Extensibility
         /// </summary>
         private void ProcessAddinsFile(DirectoryInfo baseDir, string fileName, bool fromWildCard)
         {
-            log.Info("Processing addins file " + fileName);
+            log.Info($"  Addins File: {Path.GetFileName(fileName)}");
 
             using (var rdr = new StreamReader(fileName))
             {
@@ -351,8 +333,6 @@ namespace TestCentric.Extensibility
             {
                 Visit(filePath);
 
-                log.Info($"Processing candidate assembly: {filePath} ,fromWildCard = {fromWildCard}");
-
                 try
                 {
                     var candidate = new ExtensionAssembly(filePath, fromWildCard);
@@ -366,16 +346,16 @@ namespace TestCentric.Extensibility
                             if (candidate.IsBetterVersionOf(assembly))
                             {
                                 _extensionAssemblies[i] = candidate;
-                                log.Debug("  Duplicate assembly replaced by better version");
+                                log.Info($"  Assembly: {Path.GetFileName(filePath)} ,fromWildCard = {fromWildCard}, duplicate replacing original");
                             }
                             else
-                                log.Debug("  Duplicate assembly ignored");
+                                log.Info($"  Assembly: {Path.GetFileName(filePath)} ,fromWildCard = {fromWildCard}, duplicate ignored");
                             
                             return;
                         }
                     }
 
-                    log.Debug("  Candidate assembly was added");
+                    log.Info($"  Assembly: {Path.GetFileName(filePath)} ,fromWildCard = {fromWildCard}, saved");
                     _extensionAssemblies.Add(candidate);
                 }
                 catch (BadImageFormatException e)
@@ -390,7 +370,7 @@ namespace TestCentric.Extensibility
                 }
             }
             else
-                log.Debug($"Skipping candidate assembly {filePath} - Already Visited");
+                log.Info($"  Assembly: {Path.GetFileName(filePath)} ,fromWildCard = {fromWildCard}, already visited");
         }
 
         private Dictionary<string, object> _visited = new Dictionary<string, object>();
@@ -410,48 +390,96 @@ namespace TestCentric.Extensibility
         /// For each extension, create an ExtensionNode and link it to the
         /// correct ExtensionPoint. Internal for testing.
         /// </summary>
-        internal void FindExtensionsInAssembly(ExtensionAssembly assembly)
+        internal void FindExtensionsInAssembly(ExtensionAssembly extensionAssembly)
         {
-            log.Info($"Scanning {assembly.FilePath} assembly for Extensions");
+            log.Info($"  Assembly: {Path.GetFileName(extensionAssembly.FilePath)}");
 
-            if (!CanLoadTargetFramework(Assembly.GetEntryAssembly(), assembly))
+            if (!CanLoadTargetFramework(Assembly.GetEntryAssembly(), extensionAssembly))
             {
-                log.Info($"{assembly.FilePath} cannot be loaded on this runtime");
+                log.Info($"{extensionAssembly.FilePath} cannot be loaded on this runtime");
                 return;
             }
 
             IRuntimeFramework assemblyTargetFramework = null;
 
-            foreach (var type in assembly.MainModule.GetTypes())
+            foreach (var extensionType in extensionAssembly.MainModule.GetTypes())
             {
-                log.Debug($"Examining Type {type.Name}");
-
-                CustomAttribute extensionAttr = type.GetAttribute("NUnit.Engine.Extensibility.ExtensionAttribute");
+                CustomAttribute extensionAttr = extensionType.GetAttribute("NUnit.Engine.Extensibility.ExtensionAttribute");
 
                 if (extensionAttr == null)
-                    continue;
-
-                log.Info($"ExtensionAttribute found on {type.Name}");
-
-                string versionArg = extensionAttr.GetNamedArgument("EngineVersion") as string;
-                if (versionArg != null)
+                    log.Debug($"  Type: {extensionType.Name} - not an extension");
+                else
                 {
-                    int dash = versionArg.IndexOf('-');
+                    log.Info($"  Type: {extensionType.Name} - found ExtensionAttribute");
 
-                    Version requiredVersion = dash > 0 ? new Version(versionArg.Substring(0, dash)) : new Version(versionArg);
-                    if (requiredVersion > NUNIT_API_VERSION)
+                    ExtensionNode extensionNode = BuildExtensionNode(extensionAttr, extensionType, extensionAssembly, assemblyTargetFramework);
+                    ExtensionPoint extensionPoint = BuildExtensionPoint(extensionNode, extensionType, extensionAssembly.FromWildCard);
+
+                    string versionArg = extensionAttr.GetNamedArgument("EngineVersion") as string;
+                    if (versionArg != null && !CheckRequiredVersion(versionArg, extensionPoint))
+                        log.Warning($"  Ignoring {extensionType.Name}. It requires version {versionArg}.");
+                    else
                     {
-                        log.Warning($"  Ignoring {type.Name} because it requires NUnit {requiredVersion} API");
-                        continue;
-                    }
+                        AddExtensionPropertiesToNode(extensionType, extensionNode);
 
-                    // TODO: Need to specify pre-release suffix for the engine in some way
-                    // and then compare here appropriately. For now, no action so any suffix
-                    // is actually ignored.
+                        _extensions.Add(extensionNode);
+                        extensionPoint.Install(extensionNode);
+                        log.Info($"    Installed at path {extensionNode.Path}");
+                    }
+                }
+            }
+        }
+
+        private ExtensionNode BuildExtensionNode(CustomAttribute attr, TypeDefinition type, ExtensionAssembly assembly, IRuntimeFramework targetFramework)
+        {
+            object enabledArg = attr.GetNamedArgument("Enabled");
+            var node = new ExtensionNode(assembly.FilePath, assembly.AssemblyVersion, type.FullName, targetFramework) {
+                Path = attr.GetNamedArgument("Path") as string,
+                Description = attr.GetNamedArgument("Description") as string,
+                Enabled = enabledArg != null ? (bool)enabledArg : true
+            };
+
+            return node;
+        }
+
+        private ExtensionPoint BuildExtensionPoint(ExtensionNode node, TypeDefinition type, bool fromWildCard)
+        {
+            ExtensionPoint ep;
+
+            if (node.Path == null)
+            {
+                ep = DeduceExtensionPointFromType(type);
+                if (ep == null)
+                    throw new Exception($"Unable to deduce ExtensionPoint for Type {type.FullName}. Specify Path on ExtensionAttribute to resolve.");
+
+                log.Debug($"    Deduced Path {ep.Path}");
+                node.Path = ep.Path;
+            }
+            else
+            {
+                ep = GetExtensionPoint(node.Path);
+                if (ep == null && !fromWildCard)
+                    throw new Exception($"Unable to locate ExtensionPoint for Type {type.FullName}. The Path {node.Path} cannot be found.");
+            }
+
+            return ep;
+        }
+
+        private bool CheckRequiredVersion(string versionArg, ExtensionPoint ep)
+        {
+            int dash = versionArg.IndexOf('-');
+
+            Version requiredVersion = dash > 0 ? new Version(versionArg.Substring(0, dash)) : new Version(versionArg);
+
+            return requiredVersion <= ep.AssemblyName.Version;
+
+            // TODO: Need to specify pre-release suffix for the engine in some way
+            // and then compare here appropriately. For now, no action so any suffix
+            // is actually ignored.
 
 #if false
                     // Partial code as there's nothing to compare suffix to
-                    if (requiredVersion == NUNIT_API_VERSION && dash > 0)
+                    if (requiredVersion == ep.AssemblyName.Version && dash > 0)
                     {
                         string suffix = versionArg.Substring(dash + 1);
                         string label = "";
@@ -463,57 +491,22 @@ namespace TestCentric.Extensibility
                         }
                     }
 #endif
-                }
-
-                var node = new ExtensionNode(assembly.FilePath, assembly.AssemblyVersion, type.FullName, assemblyTargetFramework);
-                node.Path = extensionAttr.GetNamedArgument("Path") as string;
-                node.Description = extensionAttr.GetNamedArgument("Description") as string;
-
-                object enabledArg = extensionAttr.GetNamedArgument("Enabled");
-                node.Enabled = enabledArg != null
-                    ? (bool)enabledArg : true;
-
-                foreach (var attr in type.GetAttributes("NUnit.Engine.Extensibility.ExtensionPropertyAttribute"))
-                {
-                    string name = attr.ConstructorArguments[0].Value as string;
-                    string value = attr.ConstructorArguments[1].Value as string;
-
-                    if (name != null && value != null)
-                    {
-                        node.AddProperty(name, value);
-                        log.Info("        ExtensionProperty {0} = {1}", name, value);
-                    }
-                }
-
-                _extensions.Add(node);
-                log.Info($"Added extension {node.TypeName}");
-
-                ExtensionPoint ep;
-                if (node.Path == null)
-                {
-                    ep = DeduceExtensionPointFromType(type);
-                    if (ep == null)
-                        throw new Exception($"Unable to deduce ExtensionPoint for Type {type.FullName}. Specify Path on ExtensionAttribute to resolve.");
-
-                    node.Path = ep.Path;
-                }
-                else
-                {
-                    // HACK
-                    ep = GetExtensionPoint(node.Path) as ExtensionPoint;
-                    if (ep == null)
-                    {
-                        if (assembly.FromWildCard) return;
-
-                        throw new Exception($"Unable to locate ExtensionPoint for Type {type.FullName}. The Path {node.Path} cannot be found.");
-                    }
-                }
-
-                ep.Install(node);
-                log.Info($"Installed extension {node.TypeName} at path {node.Path}");
-            }
         }
 
+        private void AddExtensionPropertiesToNode(TypeDefinition type, ExtensionNode node)
+        {
+            foreach (var attr in type.GetAttributes("NUnit.Engine.Extensibility.ExtensionPropertyAttribute"))
+            {
+                string name = attr.ConstructorArguments[0].Value as string;
+                string value = attr.ConstructorArguments[1].Value as string;
+
+                if (name != null && value != null)
+                {
+                    node.AddProperty(name, value);
+                    log.Info("        ExtensionProperty {0} = {1}", name, value);
+                }
+            }
+        }
         /// <summary>
         /// Checks that the target framework of the current runner can load the extension assembly. For example, .NET Core
         /// cannot load .NET Framework assemblies and vice-versa.
