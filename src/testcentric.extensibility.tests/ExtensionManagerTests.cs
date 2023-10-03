@@ -72,12 +72,6 @@ namespace TestCentric.Extensibility
             Assert.That(ep.TypeName, Is.EqualTo(type.FullName));
         }
 
-        [Test]
-        public void UnknownExtensionPathReturnsNull()
-        {
-            Assert.That(_extensionManager.GetExtensionPoint("Path/Does/Not/Exist"), Is.Null);
-        }
-
         [TestCase(nameof(IDoSomething), typeof(IDoSomething))]
         [TestCase(nameof(IDoSomethingElse), typeof(IDoSomethingElse))]
         [TestCase(nameof(IDoYetAnotherThing), typeof(IDoYetAnotherThing))]
@@ -92,7 +86,13 @@ namespace TestCentric.Extensibility
         }
 
         [Test]
-        public void UnknownExtensionTypeReturnsNull()
+        public void UnknownExtensionPointPathReturnsNull()
+        {
+            Assert.That(_extensionManager.GetExtensionPoint("Path/Does/Not/Exist"), Is.Null);
+        }
+
+        [Test]
+        public void UnknownExtensionPointTypeReturnsNull()
         {
             Assert.That(_extensionManager.GetExtensionPoint(typeof(ThisIsNotAnExtensionPoint)), Is.Null);
         }

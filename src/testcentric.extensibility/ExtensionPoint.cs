@@ -5,6 +5,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using NUnit.Engine;
 using NUnit.Engine.Extensibility;
 
@@ -54,6 +55,11 @@ namespace TestCentric.Extensibility
         }
 
         #endregion
+
+        /// <summary>
+        /// The AssemblyName of the assembly in which the extension point is defined.
+        /// </summary>
+        public AssemblyName AssemblyName { get; set; }
 
         /// <summary>
         /// Gets a list of ExtensionNodes for extensions installed on this extension point.

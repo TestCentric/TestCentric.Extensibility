@@ -4,6 +4,7 @@
 // ***********************************************************************
 
 using System;
+using System.Diagnostics;
 using NUnit.Engine;
 
 namespace TestCentric
@@ -79,6 +80,19 @@ namespace TestCentric
         public static Logger GetLogger(Type type)
         {
             return GetLogger(type.FullName);
+        }
+
+        public static Logger GetConsoleLogger(string name, InternalTraceLevel level = InternalTraceLevel.Default)
+        {
+            if (level == InternalTraceLevel.Default)
+                level = TraceLevel;
+
+            return new Logger(name, level, new InternalTraceWriter(System.Console.Out));
+        }
+
+        public static Logger GetConsoleLogger(Type type, InternalTraceLevel level = InternalTraceLevel.Default)
+        {
+            return GetConsoleLogger(type.FullName, level);
         }
     }
 }

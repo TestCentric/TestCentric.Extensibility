@@ -36,7 +36,7 @@ namespace TestCentric.Extensibility
     [Extension(Path = "/TestCentric/DoesSomething")]
     public class DoesSomething2 : IDoSomething { }
 
-    [Extension(EngineVersion = "2.0.0-dev00010")] // Should not throw - bug #1
+    [Extension(EngineVersion = "1.0.0-dev00010")] // Should not throw - bug #1
     public class DoesSomethingElse : IDoSomethingElse { }
 
     [Extension(Enabled = false)]

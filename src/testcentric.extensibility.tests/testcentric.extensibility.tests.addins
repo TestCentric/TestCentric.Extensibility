@@ -1,2 +1,3 @@
-# Used for unit testing - not part of distriuted package
-testcentric.extensibility.tests.*
+# Used for unit testing - not part of distributed package
+testcentric.extensibility.tests.dll
+testcentric.extensibility.tests.exe
