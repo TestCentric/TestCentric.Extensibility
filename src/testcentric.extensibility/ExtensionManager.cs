@@ -8,8 +8,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using TestCentric.Metadata;
-using NUnit.Engine;
-using NUnit.Engine.Extensibility;
 
 namespace TestCentric.Extensibility
 {
@@ -17,7 +15,8 @@ namespace TestCentric.Extensibility
     {
         static Logger log = InternalTrace.GetLogger(typeof(ExtensionManager));
         const string DEFAULT_TYPE_EXTENSION_PREFIX = "/TestCentric/TypeExtensions/";
-
+        const string EXTENSION_ATTRIBUTE = "TestCentric.Extensibility.ExtensionAttribute";
+        const string EXTENSION_PROPERTY_ATTRIBUTE = "TestCentric.Extensibility.ExtensionPropertyAttribute";
 
         private readonly List<ExtensionPoint> _extensionPoints = new List<ExtensionPoint>();
         private readonly Dictionary<string, ExtensionPoint> _pathIndex = new Dictionary<string, ExtensionPoint>();
@@ -400,11 +399,9 @@ namespace TestCentric.Extensibility
                 return;
             }
 
-            IRuntimeFramework assemblyTargetFramework = null;
-
             foreach (var extensionType in extensionAssembly.MainModule.GetTypes())
             {
-                CustomAttribute extensionAttr = extensionType.GetAttribute("NUnit.Engine.Extensibility.ExtensionAttribute");
+                CustomAttribute extensionAttr = extensionType.GetAttribute(EXTENSION_ATTRIBUTE);
 
                 if (extensionAttr == null)
                     log.Debug($"  Type: {extensionType.Name} - not an extension");
@@ -412,7 +409,7 @@ namespace TestCentric.Extensibility
                 {
                     log.Info($"  Type: {extensionType.Name} - found ExtensionAttribute");
 
-                    ExtensionNode extensionNode = BuildExtensionNode(extensionAttr, extensionType, extensionAssembly, assemblyTargetFramework);
+                    ExtensionNode extensionNode = BuildExtensionNode(extensionAttr, extensionType, extensionAssembly);
                     ExtensionPoint extensionPoint = BuildExtensionPoint(extensionNode, extensionType, extensionAssembly.FromWildCard);
 
                     string versionArg = extensionAttr.GetNamedArgument("EngineVersion") as string;
@@ -430,10 +427,10 @@ namespace TestCentric.Extensibility
             }
         }
 
-        private ExtensionNode BuildExtensionNode(CustomAttribute attr, TypeDefinition type, ExtensionAssembly assembly, IRuntimeFramework targetFramework)
+        private ExtensionNode BuildExtensionNode(CustomAttribute attr, TypeDefinition type, ExtensionAssembly assembly)
         {
             object enabledArg = attr.GetNamedArgument("Enabled");
-            var node = new ExtensionNode(assembly.FilePath, assembly.AssemblyVersion, type.FullName, targetFramework) {
+            var node = new ExtensionNode(assembly.FilePath, assembly.AssemblyVersion, type.FullName) {
                 Path = attr.GetNamedArgument("Path") as string,
                 Description = attr.GetNamedArgument("Description") as string,
                 Enabled = enabledArg != null ? (bool)enabledArg : true
@@ -495,7 +492,7 @@ namespace TestCentric.Extensibility
 
         private void AddExtensionPropertiesToNode(TypeDefinition type, ExtensionNode node)
         {
-            foreach (var attr in type.GetAttributes("NUnit.Engine.Extensibility.ExtensionPropertyAttribute"))
+            foreach (var attr in type.GetAttributes(EXTENSION_PROPERTY_ATTRIBUTE))
             {
                 string name = attr.ConstructorArguments[0].Value as string;
                 string value = attr.ConstructorArguments[1].Value as string;
