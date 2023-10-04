@@ -4,15 +4,10 @@
 // ***********************************************************************
 
 // Use aliases so we can later switch to TestCentric attibutes
-using ExtensionPointAttribute = NUnit.Engine.Extensibility.ExtensionPointAttribute;
-using TypeExtensionPointAttribute = NUnit.Engine.Extensibility.TypeExtensionPointAttribute;
-using ExtensionAttribute = NUnit.Engine.Extensibility.ExtensionAttribute;
-using NUnit.Engine.Extensibility;
 using System;
-using NUnit.Framework;
 
 // ExtensionPoint specified at assembly level - we use this technique for the NUnit V2 Fraemwork Driver.
-[assembly: ExtensionPoint("/TestCentric/DoesSomething", typeof(TestCentric.Extensibility.IDoSomething),
+[assembly: TestCentric.Extensibility.ExtensionPoint("/TestCentric/DoesSomething", typeof(TestCentric.Extensibility.IDoSomething),
     Description = "Extension point specified at assembly level")]
 
 namespace TestCentric.Extensibility

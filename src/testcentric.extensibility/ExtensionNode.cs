@@ -6,8 +6,6 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using NUnit.Engine;
-using NUnit.Engine.Extensibility;
 #if !NETFRAMEWORK
 using System.Linq;
 #endif
@@ -32,12 +30,12 @@ namespace TestCentric.Extensibility
         /// <param name="assemblyVersion">The version of the extension assembly.</param>
         /// <param name="typeName">The full name of the Type of the extension object.</param>
         /// <param name="targetFramework">The target framework of the extension assembly.</param>
-        public ExtensionNode(string assemblyPath, Version assemblyVersion, string typeName, IRuntimeFramework targetFramework)
+        public ExtensionNode(string assemblyPath, Version assemblyVersion, string typeName)
         {
             AssemblyPath = assemblyPath;
             AssemblyVersion = assemblyVersion;
             TypeName = typeName;
-            TargetFramework = targetFramework;
+            //TargetFramework = targetFramework;
             Enabled = true; // By default
         }
 
@@ -69,7 +67,9 @@ namespace TestCentric.Extensibility
         /// <summary>
         /// The TargetFramework of the extension assembly.
         /// </summary>
-        public IRuntimeFramework TargetFramework { get; }
+        // TODO: Determine whether we need this or some other kind
+        // of info about the target framework.
+        //public IRuntimeFramework TargetFramework { get; }
 
         /// <summary>
         /// Gets a collection of the names of all this extension's properties
