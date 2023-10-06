@@ -17,6 +17,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="../testcentric.extensibility/testcentric.extensibility.csproj" />
+		<ProjectReference Include="..\TestCentric.Extensibility.Api\testcentric.extensibility.api.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

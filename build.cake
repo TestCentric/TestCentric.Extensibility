@@ -26,7 +26,7 @@ BuildSettings.Initialize(
 
 BuildSettings.Packages.Add(new NuGetPackage(
 	id: "TestCentric.Extensibility",
-	source: "src/testcentric.extensibility/testcentric.extensibility.csproj",
+	source: "nuget/TestCentric.Extensibility.nuspec",
 	checks: new PackageCheck[] {
 		HasFiles(
 			"LICENSE.txt", "README.md", "testcentric.png",
@@ -44,6 +44,16 @@ BuildSettings.Packages.Add(new NuGetPackage(
 				"lib/net40/testcentric.engine.metadata.dll",
 				"lib/netstandard1.6/testcentric.engine.metadata.dll",
 				"lib/netstandard2.0/testcentric.engine.metadata.dll") }));
+
+BuildSettings.Packages.Add(new NuGetPackage(
+	id: "TestCentric.Extensibility.Api",
+	source: "nuget/TestCentric.Extensibility.Api.nuspec",
+	checks: new PackageCheck[] {
+		HasFiles(
+			"LICENSE.txt", "README.md", "testcentric.png",
+			"lib/net20/testcentric.extensibility.api.dll",
+			"lib/net462/testcentric.extensibility.api.dll",
+			"lib/netstandard2.0/testcentric.extensibility.api.dll") }));
 
 //////////////////////////////////////////////////////////////////////
 // TASK TARGETS

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+    <metadata>
+        <id>TestCentric.Extensibility</id>
+        <version>2.0.0-dev00020</version>
+        <title>TestCentric Extensibility</title>
+        <authors>Charlie Poole</authors>
+        <license type="expression">MIT</license>
+        <licenseUrl>https://licenses.nuget.org/MIT</licenseUrl>
+        <icon>testcentric.png</icon>
+        <readme>README.md</readme>
+        <projectUrl>https://test-centric.org/</projectUrl>
+        <description>This package includes the testcentric.extensibility assembly, which implements TestCentric's algorithm for managing extensions.</description>
+        <copyright>Copyright 2021-2023 (c) Charlie Poole</copyright>
+        <repository url="https://github.com/TestCentric/testcentric-extensibility" />
+        <dependencies>
+			<dependency id="NUnit.Engine.Api" version="3.16.2" exclude="Build,Analyzers" />
+			<dependency id="TestCentric.Metadata" version="2.0.0" exclude="Build,Analyzers" />
+        </dependencies>
+    </metadata>
+	<files>
+		<file src="../../README.md" />
+		<file src="../../LICENSE.txt" />
+		<file src="../../testcentric.png" />
+		<file src="net20/testcentric.extensibility.dll" target="lib/net20" />
+		<file src="net20/testcentric.extensibility.api.dll" target="lib/net20" />
+		<file src="net462/testcentric.extensibility.dll" target="lib/net462" />
+		<file src="net462/testcentric.extensibility.api.dll" target="lib/net462" />
+		<file src="netstandard2.0/testcentric.extensibility.dll" target="lib/netstandard2.0" />
+		<file src="netstandard2.0/testcentric.extensibility.api.dll" target="lib/netstandard2.0" />
+	</files>
+</package>

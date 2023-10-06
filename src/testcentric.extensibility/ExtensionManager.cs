@@ -120,7 +120,7 @@ namespace TestCentric.Extensibility
                     yield return node;
         }
 
-        public IEnumerable<ExtensionNode> GetExtensionNodes<T>(bool includeDisabled = false)
+        public IEnumerable<IExtensionNode> GetExtensionNodes<T>(bool includeDisabled = false)
         {
             var ep = GetExtensionPoint(typeof(T));
             if (ep != null)
@@ -183,7 +183,7 @@ namespace TestCentric.Extensibility
         public IEnumerable<T> GetExtensions<T>()
         {
             foreach (var node in GetExtensionNodes<T>())
-                yield return (T)node.ExtensionObject;
+                yield return (T)((ExtensionNode)node).ExtensionObject;
         }
 
         /// <summary>
