@@ -21,6 +21,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "testcentric.extensibility.api", "src\testCentric.extensibility.api\testcentric.extensibility.api.csproj", "{BE988F0A-3337-4DC6-8915-138C4875FD04}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nuget", "nuget", "{35D000FF-2CF2-4722-9FAD-A3122B9AF266}"
+	ProjectSection(SolutionItems) = preProject
+		nuget\TestCentric.Extensibility.Api.nuspec = nuget\TestCentric.Extensibility.Api.nuspec
+		nuget\TestCentric.Extensibility.nuspec = nuget\TestCentric.Extensibility.nuspec
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -35,9 +43,16 @@ Global
 		{DD83C188-C0A1-415D-BFB5-A1771282D38B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DD83C188-C0A1-415D-BFB5-A1771282D38B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DD83C188-C0A1-415D-BFB5-A1771282D38B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BE988F0A-3337-4DC6-8915-138C4875FD04}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BE988F0A-3337-4DC6-8915-138C4875FD04}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BE988F0A-3337-4DC6-8915-138C4875FD04}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BE988F0A-3337-4DC6-8915-138C4875FD04}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{35D000FF-2CF2-4722-9FAD-A3122B9AF266} = {5BF7211F-5504-465B-AAB8-E73860BD6A11}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {54FED299-6522-4CCF-BB89-97862E41F14A}

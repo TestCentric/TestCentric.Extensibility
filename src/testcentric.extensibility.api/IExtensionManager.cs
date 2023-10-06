@@ -53,7 +53,7 @@ namespace TestCentric.Extensibility
 
         IEnumerable<IExtensionNode> GetExtensionNodes(string path);
 
-        IEnumerable<ExtensionNode> GetExtensionNodes<T>(bool includeDisabled = false);
+        IEnumerable<IExtensionNode> GetExtensionNodes<T>(bool includeDisabled = false);
 
         void EnableExtension(string typeName, bool enabled);
 
