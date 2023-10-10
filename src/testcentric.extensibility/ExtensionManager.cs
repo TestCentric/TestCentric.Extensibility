@@ -15,8 +15,12 @@ namespace TestCentric.Extensibility
     {
         static Logger log = InternalTrace.GetLogger(typeof(ExtensionManager));
         const string DEFAULT_TYPE_EXTENSION_PREFIX = "/TestCentric/TypeExtensions/";
-        const string EXTENSION_ATTRIBUTE = "TestCentric.Extensibility.ExtensionAttribute";
-        const string EXTENSION_PROPERTY_ATTRIBUTE = "TestCentric.Extensibility.ExtensionPropertyAttribute";
+
+        const string TESTCENTRIC_EXTENSION_ATTRIBUTE = "TestCentric.Extensibility.ExtensionAttribute";
+        const string TESTCENTRIC_EXTENSION_PROPERTY_ATTRIBUTE = "TestCentric.Extensibility.ExtensionPropertyAttribute";
+
+        const string NUNIT_EXTENSION_ATTRIBUTE = "NUnit.Engine.Extensibility.ExtensionAttribute";
+        const string NUNIT_EXTENSION_PROPERTY_ATTRIBUTE = "NUnit.Engine.Extensibility.ExtensionPropertyAttribute";
 
         private readonly List<ExtensionPoint> _extensionPoints = new List<ExtensionPoint>();
         private readonly Dictionary<string, ExtensionPoint> _pathIndex = new Dictionary<string, ExtensionPoint>();
@@ -142,6 +146,11 @@ namespace TestCentric.Extensibility
         #endregion
 
         #endregion
+
+        public InternalTraceLevel InternalTraceLevel { get; set; }
+
+        public string WorkDirectory { get; set; }
+
 
         public ExtensionPoint GetExtensionPoint(string path)
         {
@@ -401,7 +410,9 @@ namespace TestCentric.Extensibility
 
             foreach (var extensionType in extensionAssembly.MainModule.GetTypes())
             {
-                CustomAttribute extensionAttr = extensionType.GetAttribute(EXTENSION_ATTRIBUTE);
+                CustomAttribute extensionAttr =
+                    extensionType.GetAttribute(TESTCENTRIC_EXTENSION_ATTRIBUTE) ??
+                    extensionType.GetAttribute(NUNIT_EXTENSION_ATTRIBUTE);
 
                 if (extensionAttr == null)
                     log.Debug($"  Type: {extensionType.Name} - not an extension");
@@ -492,17 +503,22 @@ namespace TestCentric.Extensibility
 
         private void AddExtensionPropertiesToNode(TypeDefinition type, ExtensionNode node)
         {
-            foreach (var attr in type.GetAttributes(EXTENSION_PROPERTY_ATTRIBUTE))
-            {
-                string name = attr.ConstructorArguments[0].Value as string;
-                string value = attr.ConstructorArguments[1].Value as string;
-
-                if (name != null && value != null)
+            // TODO: Review this
+            // This code allows use of TestCentric and NUnit versions of the extension property
+            // attribute for either type of extension. We may want to prevent that in future.
+            var propAttrs = new[] { TESTCENTRIC_EXTENSION_PROPERTY_ATTRIBUTE, NUNIT_EXTENSION_PROPERTY_ATTRIBUTE };
+            foreach (string attrName in propAttrs )
+                foreach (var attr in type.GetAttributes(attrName))
                 {
-                    node.AddProperty(name, value);
-                    log.Info("        ExtensionProperty {0} = {1}", name, value);
+                    string name = attr.ConstructorArguments[0].Value as string;
+                    string value = attr.ConstructorArguments[1].Value as string;
+
+                    if (name != null && value != null)
+                    {
+                        node.AddProperty(name, value);
+                        log.Info("        ExtensionProperty {0} = {1}", name, value);
+                    }
                 }
-            }
         }
         /// <summary>
         /// Checks that the target framework of the current runner can load the extension assembly. For example, .NET Core
