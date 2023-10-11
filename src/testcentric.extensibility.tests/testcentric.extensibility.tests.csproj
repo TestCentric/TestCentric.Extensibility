@@ -17,13 +17,14 @@
 
 	<ItemGroup>
 		<ProjectReference Include="../testcentric.extensibility/testcentric.extensibility.csproj" />
-		<ProjectReference Include="..\TestCentric.Extensibility.Api\testcentric.extensibility.api.csproj" />
+		<ProjectReference Include="../TestCentric.Extensibility.Api/testcentric.extensibility.api.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="NSubstitute" Version="2.0.3" />
 		<PackageReference Include="NUnit" Version="3.12.0" />
 		<PackageReference Include="NUnitLite" Version="3.12.0" />
+		<PackageReference Include="NUnit.Engine.Api" Version="3.16.2" />
 	</ItemGroup>
 
 	<ItemGroup>

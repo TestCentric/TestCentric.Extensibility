@@ -16,8 +16,8 @@ namespace TestCentric.Extensibility
     [TestFixture("/TestCentric/Engine/TypeExtensions/")]
     public class ExtensionManagerTests
     {
-        private static readonly Assembly THIS_ASSEMBLY = typeof(ExtensionManagerTests).Assembly;
-        private static readonly ExtensionManagerTestData[] Examples = ExtensionManagerTestData.Examples;
+        private static readonly Assembly THIS_ASSEMBLY = typeof(IDoSomething).Assembly;
+        private static readonly string THIS_ASSEMBLY_DIRECTORY = Path.GetDirectoryName(THIS_ASSEMBLY.Location);
 
         private ExtensionManager _extensionManager;
 
@@ -44,7 +44,7 @@ namespace TestCentric.Extensibility
         [OneTimeSetUp]
         public void CreateManager()
         {
-            _extensionManager = new ExtensionManager(THIS_ASSEMBLY);
+            _extensionManager = new ExtensionManager(THIS_ASSEMBLY) { InitialAddinsDirectory = THIS_ASSEMBLY_DIRECTORY };
 
             if (PrefixWasProvided)
                 _extensionManager.DefaultTypeExtensionPrefix = Prefix;
@@ -99,16 +99,18 @@ namespace TestCentric.Extensibility
 
         class ThisIsNotAnExtensionPoint { }
 
-        [TestCase(typeof(DoesSomething))]
-        [TestCase(typeof(DoesSomething2))]
-        [TestCase(typeof(DoesSomethingElse))]
-        [TestCase(typeof(DoesYetAnotherThing))]
-        public void AllExtensionsAreKnown(Type type)
+        static string[] KnownExtensions = new[] {
+            "TestCentric.Extensibility.DoesSomething",
+            "TestCentric.Extensibility.DoesSomething2",
+            "TestCentric.Extensibility.DoesSomethingElse",
+            "TestCentric.Extensibility.DoesYetAnotherThing",
+            "TestCentric.Extensibility.NUnitExtension"
+        };
+
+        [Test]
+        public void AllExtensionsAreKnown()
         {
-            // Note: Our data is set up so each extension is used only once
-            var node = _extensionManager.Extensions.Where(n => n.TypeName == type.FullName).First();
-            Assert.That(node, Is.Not.Null);
-            Assert.That(node.TypeName, Is.EqualTo(type.FullName));
+            Assert.That(_extensionManager.Extensions.Select(ep => ep.TypeName), Is.EquivalentTo(KnownExtensions));
         }
 
         // Run this first as subsequent test will enable the extension
@@ -276,4 +278,6 @@ namespace TestCentric.Extensibility
             return GetSiblingDirectory("netcoreapp2.1");
         }
     }
+
+    
 }

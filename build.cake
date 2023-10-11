@@ -33,11 +33,6 @@ BuildSettings.Packages.Add(new NuGetPackage(
 			"lib/net20/testcentric.extensibility.dll",
 			"lib/net462/testcentric.extensibility.dll",
 			"lib/netstandard2.0/testcentric.extensibility.dll"),
-		// Minimal checks for dependent packages
-		HasDependency("NUnit.Engine.Api")
-			.WithFiles(
-				"lib/net20/nunit.engine.api.dll",
-				"lib/netstandard2.0/nunit.engine.api.dll"),
 		HasDependency("TestCentric.Metadata")
 			.WithFiles(
 				"lib/net20/testcentric.engine.metadata.dll",
