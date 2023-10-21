@@ -15,7 +15,8 @@
         <repository url="https://github.com/TestCentric/testcentric-extensibility" />
         <dependencies>
 			<dependency id="TestCentric.Metadata" version="2.0.0" exclude="Build,Analyzers" />
-        </dependencies>
+			<dependency id="TestCentric.InternalTrace" version="1.0.0" exclude="Build,Analyzers" />
+		</dependencies>
     </metadata>
 	<files>
 		<file src="../../README.md" />
