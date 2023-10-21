@@ -1,18 +1,7 @@
-#tool NuGet.CommandLine&version=6.0.0
-
 // Load the recipe
-#load nuget:?package=TestCentric.Cake.Recipe&version=1.1.0-dev00050
+#load nuget:?package=TestCentric.Cake.Recipe&version=1.1.0-dev00054
 // Comment out above line and uncomment below for local tests of recipe changes
 //#load ../TestCentric.Cake.Recipe/recipe/*.cake
-
-var NUGET_ID = "TestCentric.Extensibility";
-
-string Configuration = Argument("configuration", Argument("c", "Release"));
-
-string PackageVersion;
-string PackageName;
-bool IsProductionRelease;
-bool IsDevelopmentRelease;
 
 //////////////////////////////////////////////////////////////////////
 // INITIALIZE BUILD SETTINGS
@@ -38,7 +27,12 @@ BuildSettings.Packages.Add(new NuGetPackage(
 				"lib/net20/testcentric.engine.metadata.dll",
 				"lib/net40/testcentric.engine.metadata.dll",
 				"lib/netstandard1.6/testcentric.engine.metadata.dll",
-				"lib/netstandard2.0/testcentric.engine.metadata.dll") }));
+				"lib/netstandard2.0/testcentric.engine.metadata.dll"),
+		HasDependency("TestCentric.Extensibility")
+			.WithFiles(
+				"lib/net20/TestCentric.Extensibility.dll",
+				"lib/net462/TestCentric.Extensibility.dll",
+				"lib/netstandard2.0/TestCentric.Extensibility.dll") }));
 
 BuildSettings.Packages.Add(new NuGetPackage(
 	id: "TestCentric.Extensibility.Api",
@@ -55,8 +49,11 @@ BuildSettings.Packages.Add(new NuGetPackage(
 //////////////////////////////////////////////////////////////////////
 
 Task("AppVeyor")
-	.IsDependentOn("BuildTestAndPackage")
-	.IsDependentOn("PublishToMyGet")
+	.IsDependentOn("Build")
+	.IsDependentOn("Test")
+	.IsDependentOn("Package")
+	.IsDependentOn("Publish")
+	.IsDependentOn("CreateDraftRelease")
 	.IsDependentOn("CreateProductionRelease");
 
 Task("Default")
@@ -66,4 +63,4 @@ Task("Default")
 // EXECUTION
 //////////////////////////////////////////////////////////////////////
 
-RunTarget(Argument("target", Argument("t", "Default")));
+RunTarget(CommandLineOptions.Target);
