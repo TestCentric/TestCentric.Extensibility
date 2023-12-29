@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.33530.505
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "testcentric.extensibility", "src\testcentric.extensibility\testcentric.extensibility.csproj", "{885A9279-CED3-4007-A6E8-AC0D33E2C929}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestCentric.Extensibility", "src\testcentric.extensibility\TestCentric.Extensibility.csproj", "{885A9279-CED3-4007-A6E8-AC0D33E2C929}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "testcentric.extensibility.tests", "src\testcentric.extensibility.tests\testcentric.extensibility.tests.csproj", "{DD83C188-C0A1-415D-BFB5-A1771282D38B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestCentric.Extensibility.Tests", "src\testcentric.extensibility.tests\TestCentric.Extensibility.Tests.csproj", "{DD83C188-C0A1-415D-BFB5-A1771282D38B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{5BF7211F-5504-465B-AAB8-E73860BD6A11}"
 	ProjectSection(SolutionItems) = preProject
@@ -22,7 +22,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "testcentric.extensibility.api", "src\testCentric.extensibility.api\testcentric.extensibility.api.csproj", "{BE988F0A-3337-4DC6-8915-138C4875FD04}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestCentric.Extensibility.Api", "src\testCentric.extensibility.api\TestCentric.Extensibility.Api.csproj", "{BE988F0A-3337-4DC6-8915-138C4875FD04}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nuget", "nuget", "{35D000FF-2CF2-4722-9FAD-A3122B9AF266}"
 	ProjectSection(SolutionItems) = preProject
