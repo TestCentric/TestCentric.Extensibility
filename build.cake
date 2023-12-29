@@ -10,8 +10,8 @@
 BuildSettings.Initialize(
 	context: Context,
 	title: "TestCentric Extensibility",
-	solutionFile: "testcentric-extensibility.sln",
-	githubRepository: "testcentric-extensibility");
+	solutionFile: "TestCentric.Extensibility.sln",
+	githubRepository: "TestCentric.Extensibility");
 
 BuildSettings.Packages.Add(new NuGetPackage(
 	id: "TestCentric.Extensibility",
@@ -28,11 +28,11 @@ BuildSettings.Packages.Add(new NuGetPackage(
 				"lib/net40/testcentric.engine.metadata.dll",
 				"lib/netstandard1.6/testcentric.engine.metadata.dll",
 				"lib/netstandard2.0/testcentric.engine.metadata.dll"),
-		HasDependency("TestCentric.Extensibility")
+		HasDependency("TestCentric.InternalTrace")
 			.WithFiles(
-				"lib/net20/TestCentric.Extensibility.dll",
-				"lib/net462/TestCentric.Extensibility.dll",
-				"lib/netstandard2.0/TestCentric.Extensibility.dll") }));
+				"lib/net20/TestCentric.InternalTrace.dll",
+				"lib/net462/TestCentric.InternalTrace.dll",
+				"lib/netstandard2.0/TestCentric.InternalTrace.dll") }));
 
 BuildSettings.Packages.Add(new NuGetPackage(
 	id: "TestCentric.Extensibility.Api",
