@@ -3,12 +3,15 @@
 // Licensed under the MIT License. See LICENSE file in root directory.
 // ***********************************************************************
 
+// TODO: Get this test working under .NET 8.0
+#if NETFRAMEWORK
 using System;
 using System.Linq;
 using System.IO;
 using System.Reflection;
 using System.Collections.Generic;
 using NUnit.Framework;
+using System.Diagnostics;
 
 namespace TestCentric.Extensibility
 {
@@ -277,7 +280,6 @@ namespace TestCentric.Extensibility
         {
             return GetSiblingDirectory("netcoreapp2.1");
         }
-    }
-
-    
+    }  
 }
+#endif

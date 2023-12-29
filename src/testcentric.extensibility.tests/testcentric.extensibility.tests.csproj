@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>net35;net462;netcoreapp2.1</TargetFrameworks>
+		<TargetFrameworks>net35;net462;net8.0</TargetFrameworks>
 		<RootNamespace>TestCentric.Extensibility</RootNamespace>
 		<SignAssembly>true</SignAssembly>
 		<AssemblyOriginatorKeyFile>testcentric.snk</AssemblyOriginatorKeyFile>
@@ -10,10 +10,6 @@
 		<DebugType>Full</DebugType>
 		<OutputPath>..\..\bin\$(Configuration)\tests</OutputPath>
 	</PropertyGroup>
-
-	<ItemGroup Condition="'$(TargetFramework)'=='netcoreapp2.1'">
-		<PackageReference Include="System.ComponentModel.TypeConverter" Version="4.3.0" />
-	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="../testcentric.extensibility/testcentric.extensibility.csproj" />
