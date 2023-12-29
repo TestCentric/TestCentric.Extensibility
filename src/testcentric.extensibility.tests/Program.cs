@@ -12,6 +12,7 @@ namespace TestCentric.Extensibility
     {
         static int Main(string[] args)
         {
+            InternalTrace.Initialize(null, InternalTraceLevel.Off);
 #if NETFRAMEWORK
             return new AutoRun().Execute(args);
 #else
