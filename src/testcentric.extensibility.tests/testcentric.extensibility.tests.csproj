@@ -12,8 +12,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="../testcentric.extensibility/testcentric.extensibility.csproj" />
-		<ProjectReference Include="../TestCentric.Extensibility.Api/testcentric.extensibility.api.csproj" />
+		<ProjectReference Include="..\TestCentric.Extensibility\TestCentric.Extensibility.csproj" />
+		<ProjectReference Include="..\TestCentric.Extensibility.Api\TestCentric.Extensibility.Api.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -24,7 +24,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <None Update="testcentric.extensibility.tests.addins">
+	  <None Update="TestCentric.Extensibility.Tests.addins">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>
 	</ItemGroup>
