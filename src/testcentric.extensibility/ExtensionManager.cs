@@ -44,7 +44,7 @@ namespace TestCentric.Extensibility
 
         #endregion
 
-        #region IExtensionService Implementation
+        #region IExtensionManager Implementation
 
         #region Properties
 
