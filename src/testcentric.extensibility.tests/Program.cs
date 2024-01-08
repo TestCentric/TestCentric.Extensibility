@@ -3,6 +3,7 @@
 // Licensed under the MIT License. See LICENSE file in root directory.
 // ***********************************************************************
 
+using System.Diagnostics;
 using System.Reflection;
 using NUnitLite;
 
@@ -12,7 +13,8 @@ namespace TestCentric.Extensibility
     {
         static int Main(string[] args)
         {
-            InternalTrace.Initialize(null, InternalTraceLevel.Off);
+            var pid = Process.GetCurrentProcess().Id;
+            InternalTrace.Initialize($"InternalTrace_{pid}", InternalTraceLevel.Off);
 #if NETFRAMEWORK
             return new AutoRun().Execute(args);
 #else
