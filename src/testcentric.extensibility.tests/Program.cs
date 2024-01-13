@@ -13,8 +13,6 @@ namespace TestCentric.Extensibility
     {
         static int Main(string[] args)
         {
-            var pid = Process.GetCurrentProcess().Id;
-            InternalTrace.Initialize($"InternalTrace_{pid}", InternalTraceLevel.Off);
 #if NETFRAMEWORK
             return new AutoRun().Execute(args);
 #else
