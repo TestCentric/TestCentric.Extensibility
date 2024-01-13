@@ -267,7 +267,7 @@ namespace TestCentric.Extensibility
         /// <returns></returns>
         private static string GetSiblingDirectory(string dir)
         {
-            var file = new FileInfo(AssemblyHelper.GetAssemblyPath(typeof(ExtensionManagerTests).Assembly));
+            var file = new FileInfo(typeof(ExtensionManagerTests).Assembly.Location);
             return Path.Combine(file.Directory.Parent.FullName, dir);
         }
 
