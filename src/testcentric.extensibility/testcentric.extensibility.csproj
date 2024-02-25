@@ -22,8 +22,8 @@
 	</ItemGroup>
 	
 	<ItemGroup>
-		<PackageReference Include="TestCentric.Metadata" Version="3.0.2-dev00002" />
-		<PackageReference Include="TestCentric.InternalTrace" Version="1.2.0-dev00013" />
+		<PackageReference Include="TestCentric.Metadata" Version="3.0.2" />
+		<PackageReference Include="TestCentric.InternalTrace" Version="1.2.0" />
 	</ItemGroup>
 	
 </Project>

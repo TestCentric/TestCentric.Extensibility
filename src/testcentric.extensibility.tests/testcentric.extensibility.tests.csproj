@@ -16,8 +16,19 @@
 		<ProjectReference Include="..\TestCentric.Extensibility.Api\TestCentric.Extensibility.Api.csproj" />
 	</ItemGroup>
 
-	<ItemGroup>
+	<ItemGroup Condition="'$(TargetFramework)'=='net35'">
 		<PackageReference Include="NSubstitute" Version="2.0.3" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)'=='net462'">
+		<PackageReference Include="NSubstitute" Version="5.1.0" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)'=='net8.0'">
+		<PackageReference Include="NSubstitute" Version="5.1.0" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="NUnit" Version="3.12.0" />
 		<PackageReference Include="NUnitLite" Version="3.12.0" />
 		<PackageReference Include="NUnit.Engine.Api" Version="3.16.2" />
