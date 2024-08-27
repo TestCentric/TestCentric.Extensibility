@@ -1,5 +1,5 @@
 // Load the recipe
-#load nuget:?package=TestCentric.Cake.Recipe&version=1.1.2
+#load nuget:?package=TestCentric.Cake.Recipe&version=1.3.1
 // Comment out above line and uncomment below for local tests of recipe changes
 //#load ../TestCentric.Cake.Recipe/recipe/*.cake
 
@@ -11,7 +11,8 @@ BuildSettings.Initialize(
 	context: Context,
 	title: "TestCentric Extensibility",
 	solutionFile: "TestCentric.Extensibility.sln",
-	githubRepository: "TestCentric.Extensibility");
+	githubRepository: "TestCentric.Extensibility",
+	unitTests: "**/*.Tests.exe");
 
 BuildSettings.Packages.Add(new NuGetPackage(
 	id: "TestCentric.Extensibility",
