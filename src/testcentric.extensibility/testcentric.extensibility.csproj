@@ -18,12 +18,13 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\testCentric.extensibility.api\TestCentric.Extensibility.Api.csproj" />
+		<ProjectReference Include="..\TestCentric.Extensibility.Api\TestCentric.Extensibility.Api.csproj" />
 	</ItemGroup>
 	
 	<ItemGroup>
 		<PackageReference Include="TestCentric.Metadata" Version="3.0.2" />
 		<PackageReference Include="TestCentric.InternalTrace" Version="1.2.0" />
+		<PackageReference Include="NUnit.Engine.Api" Version="3.16.2" />
 	</ItemGroup>
 	
 </Project>

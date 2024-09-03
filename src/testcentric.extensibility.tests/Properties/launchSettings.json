@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "TestCentric.Extensibility.Tests": {
+      "commandName": "Project",
+      "commandLineArgs": "--test TestCentric.Extensibility.ExtensionManagerTests"
+    }
+  }
+}

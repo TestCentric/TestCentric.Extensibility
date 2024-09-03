@@ -9,12 +9,16 @@ using System.IO;
 using System.Reflection;
 using TestCentric.Metadata;
 
+using NUNIT = NUnit.Engine.Extensibility;
+
 namespace TestCentric.Extensibility
 {
     public class ExtensionManager : IExtensionManager
     {
         static Logger log = InternalTrace.GetLogger(typeof(ExtensionManager));
-        const string DEFAULT_TYPE_EXTENSION_PREFIX = "/TestCentric/TypeExtensions/";
+        const string DEFAULT_TYPE_EXTENSIONS_PATH = "/TestCentric/TypeExtensions/";
+        private const string NUNIT_TYPE_EXTENSIONS_PATH = "/NUnit/Engine/TypeExtensions/";
+        const string DEPRECATED = "It will be removed in a future release";
 
         const string TESTCENTRIC_EXTENSION_ATTRIBUTE = "TestCentric.Extensibility.ExtensionAttribute";
         const string TESTCENTRIC_EXTENSION_PROPERTY_ATTRIBUTE = "TestCentric.Extensibility.ExtensionPropertyAttribute";
@@ -28,8 +32,22 @@ namespace TestCentric.Extensibility
         private readonly List<ExtensionNode> _extensions = new List<ExtensionNode>();
         private readonly List<ExtensionAssembly> _extensionAssemblies = new List<ExtensionAssembly>();
 
-        #region Construction and Initialization
+        private string DefaultTypeExtensionsPath { get; set; }
 
+        #region Construction
+
+        public ExtensionManager() 
+        {
+            DefaultTypeExtensionsPath = DEFAULT_TYPE_EXTENSIONS_PATH;
+        }
+
+        public ExtensionManager(string defaultTypeExtensionsPath)
+        {
+            Guard.ArgumentNotNull(defaultTypeExtensionsPath, nameof(defaultTypeExtensionsPath));
+            DefaultTypeExtensionsPath = defaultTypeExtensionsPath;
+        }
+
+        [Obsolete(DEPRECATED)]
         public ExtensionManager(params Assembly[] rootAssemblies)
         {
             Guard.ArgumentNotNull(rootAssemblies, nameof(rootAssemblies));
@@ -38,7 +56,7 @@ namespace TestCentric.Extensibility
             RootAssemblies = rootAssemblies;
 
             // Set default property values - may be changed before Initialization
-            DefaultTypeExtensionPrefix = DEFAULT_TYPE_EXTENSION_PREFIX;
+            DefaultTypeExtensionPrefix = DEFAULT_TYPE_EXTENSIONS_PATH;
             InitialAddinsDirectory = Path.GetDirectoryName(RootAssemblies[0].Location);
         }
 
@@ -46,60 +64,121 @@ namespace TestCentric.Extensibility
 
         #region IExtensionManager Implementation
 
-        #region Properties
+        #region Obsolete Properties and Methods
 
-        /// <summary>
-        /// Array of assemblies whose ExtensionPoints are to be manaaged.
-        /// </summary>
+        /// <inheritdoc/>
+        [Obsolete]
         public IList<Assembly> RootAssemblies { get; private set; }
 
-        /// <summary>
-        /// Prefix used if the Path is not specified for a TypeExtensionPoint
-        /// </summary>
-        public string DefaultTypeExtensionPrefix { get; set; }
+        /// <inheritdoc/>
+        [Obsolete]
+        public string DefaultTypeExtensionPrefix 
+        { 
+            get {  return DefaultTypeExtensionsPath; }
+            set {  DefaultTypeExtensionsPath = value; } 
+        }
 
-        /// <summary>
-        /// Directory containing the initial .addins files used to locate extensions
-        /// </summary>
+        /// <inheritdoc/>
+        [Obsolete]
         public string InitialAddinsDirectory { get; set; }
 
-        /// <summary>
-        /// Gets an enumeration of all ExtensionPoints in the engine.
-        /// </summary>
+        /// <inheritdoc/>
+        /// <inheritdoc/>
+        [Obsolete]
+        public void Initialize()
+        {
+            // Find all extension points
+            log.Info("Initializing ExtensionPoints...");
+            foreach (var assembly in RootAssemblies)
+                FindExtensionPoints(assembly);
+
+            if (_extensionPoints.Count > 0)
+                FindExtensions(InitialAddinsDirectory);
+        }
+
+        #endregion
+
+        #region Extension Points
+
+        /// <inheritdoc/>
         public IEnumerable<IExtensionPoint> ExtensionPoints
         {
             get { return _extensionPoints.ToArray(); }
         }
 
-        /// <summary>
-        /// Gets an enumeration of all installed Extensions.
-        /// </summary>
-        public IEnumerable<IExtensionNode> Extensions {
-            get { return _extensions.ToArray(); }
+        /// <inheritdoc/>
+        public void FindExtensionPoints(params Assembly[] assemblies)
+        {
+            foreach (var assembly in assemblies)
+            {
+                AssemblyName assemblyName = assembly.GetName();
+
+                log.Info($"Assembly: {assemblyName.Name}");
+
+                foreach (Type type in assembly.GetExportedTypes())
+                {
+                    try
+                    {
+                        foreach (TypeExtensionPointAttribute attr in type.GetCustomAttributes(typeof(TypeExtensionPointAttribute), false))
+                            AddExtensionPoint(attr.Path ?? DefaultTypeExtensionsPath + type.Name, type, assemblyName, attr.Description);
+
+                        foreach (ExtensionPointAttribute attr in assembly.GetCustomAttributes(typeof(ExtensionPointAttribute), false))
+                            AddExtensionPoint(attr.Path, attr.Type, assemblyName, attr.Description);
+
+                        foreach (NUNIT.TypeExtensionPointAttribute attr in type.GetCustomAttributes(typeof(NUNIT.TypeExtensionPointAttribute), false))
+                            AddExtensionPoint(attr.Path ?? NUNIT_TYPE_EXTENSIONS_PATH + type.Name, type, assemblyName, attr.Description);
+
+                        foreach (NUNIT.ExtensionPointAttribute attr in assembly.GetCustomAttributes(typeof(NUNIT.ExtensionPointAttribute), false))
+                            AddExtensionPoint(attr.Path, attr.Type, assemblyName, attr.Description);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.ToString());
+                    }
+                }
+            }
+
+            void AddExtensionPoint(string path, Type type, AssemblyName assemblyName, string description = null)
+            {
+                if (_pathIndex.ContainsKey(path))
+                    throw new Exception($"The Path {path} is already in use for another extension point.");
+
+                var ep = new ExtensionPoint(path, type)
+                {
+                    Description = description,
+                    AssemblyName = assemblyName
+                };
+
+                _extensionPoints.Add(ep);
+                _pathIndex.Add(ep.Path, ep);
+
+                log.Info($"  Found Path={ep.Path}, Type={ep.TypeName}");
+            }
+        }
+
+        private void FindTypeExtensions()
+        {
+
+        }
+
+        /// <inheritdoc/>
+        IExtensionPoint IExtensionManager.GetExtensionPoint(string path)
+        {
+            return this.GetExtensionPoint(path);
         }
 
         #endregion
 
-        #region Methods
+        #region Extensions
 
-        /// <summary>
-        /// Initialize this instance of ExtensionManager by finding
-        /// all extension points and extensions.
-        /// </summary>
-        public void Initialize()
+        /// <inheritdoc/>
+        public IEnumerable<IExtensionNode> Extensions
         {
-            // TODO: Find Callers expecting NUnitEngineException
-
-            // Find all extension points
-            log.Info("Initializing ExtensionPoints...");
-            foreach (var assembly in RootAssemblies)
-                FindExtensionPoints(assembly, DefaultTypeExtensionPrefix);
-
-            // Find all extensions
-            FindExtensions(InitialAddinsDirectory);
+            get { return _extensions.ToArray(); }
         }
 
-        void FindExtensions(string startDir)
+        /// <inheritdoc/>
+        public void FindExtensions(string startDir)
         {
             // Find potential extension assemblies
             log.Info("Initializing Extensions...");
@@ -111,31 +190,14 @@ namespace TestCentric.Extensibility
                 FindExtensionsInAssembly(candidate);
         }
 
-        IExtensionPoint IExtensionManager.GetExtensionPoint(string path)
+        /// <inheritdoc/>
+        public IEnumerable<T> GetExtensions<T>()
         {
-            return this.GetExtensionPoint(path);
+            foreach (var node in GetExtensionNodes<T>())
+                yield return (T)((ExtensionNode)node).ExtensionObject;
         }
 
-        public IEnumerable<IExtensionNode> GetExtensionNodes(string path)
-        {
-            var ep = GetExtensionPoint(path);
-            if (ep != null)
-                foreach (var node in ep.Extensions)
-                    yield return node;
-        }
-
-        public IEnumerable<IExtensionNode> GetExtensionNodes<T>(bool includeDisabled = false)
-        {
-            var ep = GetExtensionPoint(typeof(T));
-            if (ep != null)
-                foreach (var node in ep.Extensions)
-                    if (includeDisabled || node.Enabled)
-                        yield return node;
-        }
-
-        /// <summary>
-        /// Enable or disable an extension
-        /// </summary>
+        /// <inheritdoc/>
         public void EnableExtension(string typeName, bool enabled)
         {
             foreach (var node in _extensions)
@@ -145,10 +207,45 @@ namespace TestCentric.Extensibility
 
         #endregion
 
+        #region Extension Nodes
+
+        /// <inheritdoc/>
+        public IExtensionNode GetExtensionNode(string path)
+        {
+            var ep = GetExtensionPoint(path);
+
+            return ep != null && ep.Extensions.Count > 0 ? ep.Extensions[0] : null;
+        }
+
+        /// <inheritdoc/>
+        public IEnumerable<IExtensionNode> GetExtensionNodes(string path)
+        {
+            var ep = GetExtensionPoint(path);
+            if (ep != null)
+                foreach (var node in ep.Extensions)
+                    yield return node;
+        }
+
+        /// <inheritdoc/>
+        public IEnumerable<IExtensionNode> GetExtensionNodes<T>(bool includeDisabled = false)
+        {
+            var ep = GetExtensionPoint(typeof(T));
+            if (ep != null)
+                foreach (var node in ep.Extensions)
+                    if (includeDisabled || node.Enabled)
+                        yield return node;
+        }
+
         #endregion
 
+        #endregion
+
+        #region Public Class-level Properties and Methods
+
+        // TODO: Is this used?
         public InternalTraceLevel InternalTraceLevel { get; set; }
 
+        // TODO: Is this used?
         public string WorkDirectory { get; set; }
 
 
@@ -156,6 +253,8 @@ namespace TestCentric.Extensibility
         {
             return _pathIndex.ContainsKey(path) ? _pathIndex[path] : null;
         }
+
+        #endregion
 
         /// <summary>
         /// Get an ExtensionPoint based on the required Type for extensions.
@@ -179,68 +278,6 @@ namespace TestCentric.Extensibility
                     return ep;
 
             return null;
-        }
-
-        public ExtensionNode GetExtensionNode(string path)
-        {
-            // HACK
-            var ep = GetExtensionPoint(path) as ExtensionPoint;
-
-            return ep != null && ep.Extensions.Count > 0 ? ep.Extensions[0] : null;
-        }
-
-        public IEnumerable<T> GetExtensions<T>()
-        {
-            foreach (var node in GetExtensionNodes<T>())
-                yield return (T)((ExtensionNode)node).ExtensionObject;
-        }
-
-        /// <summary>
-        /// Find the extension points in a loaded assembly.
-        /// </summary>
-        internal void FindExtensionPoints(Assembly assembly, string typeExtensionPrefix)
-        {
-            AssemblyName assemblyName = assembly.GetName();
-
-            log.Info($"Assembly: {assemblyName.Name}");
-
-            foreach (Type type in assembly.GetExportedTypes())
-            {
-                foreach (TypeExtensionPointAttribute attr in type.GetCustomAttributes(typeof(TypeExtensionPointAttribute), false))
-                {
-                    // TODO: This ties the extensibility package too closely to NUnit and should be changed
-                    string path = attr.Path ?? typeExtensionPrefix + type.Name;
-
-                    if (_pathIndex.ContainsKey(path))
-                        throw new Exception($"The Path {attr.Path} is already in use for another extension point.");
-
-                    var ep = new ExtensionPoint(path, type) {
-                        Description = attr.Description,
-                        AssemblyName = assemblyName
-                    };
-
-                    _extensionPoints.Add(ep);
-                    _pathIndex.Add(path, ep);
-
-                    log.Info($"  Found Path={ep.Path}, Type={ep.TypeName}");
-                }
-            }
-
-            foreach (ExtensionPointAttribute attr in assembly.GetCustomAttributes(typeof(ExtensionPointAttribute), false))
-            {
-                if (_pathIndex.ContainsKey(attr.Path))
-                    throw new Exception($"The Path {attr.Path} is already in use for another extension point.");
-
-                var ep = new ExtensionPoint(attr.Path, attr.Type) {
-                    Description = attr.Description,
-                    AssemblyName = assemblyName
-                };
-
-                _extensionPoints.Add(ep);
-                _pathIndex.Add(ep.Path, ep);
-
-                log.Info($"  Found Path={ep.Path}, Type={ep.TypeName}");
-            }
         }
 
         /// <summary>
@@ -526,32 +563,65 @@ namespace TestCentric.Extensibility
         /// </summary>
         /// <param name="runnerAsm">The executing runner</param>
         /// <param name="extensionAsm">The extension we are attempting to load</param>
-        internal static bool CanLoadTargetFramework(Assembly runnerAsm, ExtensionAssembly extensionAsm)
+        internal bool CanLoadTargetFramework(Assembly runnerAsm, ExtensionAssembly extensionAsm)
         {
             if (runnerAsm == null)
                 return true;
 
-            var extensionFrameworkName = AssemblyDefinition.ReadAssembly(extensionAsm.FilePath).GetFrameworkName();
-            var runnerFrameworkName = AssemblyDefinition.ReadAssembly(runnerAsm.Location).GetFrameworkName();
-            if (runnerFrameworkName?.StartsWith(".NETStandard") == true)
-            {
-                throw new Exception($"{runnerAsm.FullName} test runner must target .NET Core or .NET Framework, not .NET Standard");
-            }
-            else if (runnerFrameworkName?.StartsWith(".NETCoreApp") == true)
-            {
-                if (extensionFrameworkName?.StartsWith(".NETStandard") != true && extensionFrameworkName?.StartsWith(".NETCoreApp") != true)
-                {
-                    log.Info($".NET Core runners require .NET Core or .NET Standard extension for {extensionAsm.FilePath}");
-                    return false;
-                }
-            }
-            else if (extensionFrameworkName?.StartsWith(".NETCoreApp") == true)
-            {
-                log.Info($".NET Framework runners cannot load .NET Core extension {extensionAsm.FilePath}");
-                return false;
-            }
+            var runnerFrameworkName = GetTargetRuntime(runnerAsm.Location);
+            var extensionFrameworkName = GetTargetRuntime(extensionAsm.FilePath);
 
-            return true;
+            switch (runnerFrameworkName.Identifier)
+            {
+                case ".NETStandard":
+                    throw new Exception($"{runnerAsm.FullName} test runner must target .NET Core or .NET Framework, not .NET Standard");
+
+                case ".NETCoreApp":
+                    switch (extensionFrameworkName.Identifier)
+                    {
+                        case ".NetStandard":
+                        case ".NetCoreApp":
+                            return true;
+                        case ".NetFramework":
+                        default:
+                            log.Info($".NET Core runners require .NET Core or .NET Standard extension for {extensionAsm.FilePath}");
+                            return false;
+                    }
+                case ".NETFramework":
+                default:
+                    switch (extensionFrameworkName.Identifier)
+                    {
+                        case ".NETFramework":
+                            return runnerFrameworkName.Version.Major == 4 || extensionFrameworkName.Version.Major < 4;
+                        // For .NET Framework calling .NET Standard, we only support if framework is 4.7.2 or higher
+                        case ".NETStandard":
+                            return extensionFrameworkName.Version >= new Version(4, 7, 2);
+                        case ".NetCoreApp":
+                        default:
+                            log.Info($".NET Framework runners cannot load .NET Core extension {extensionAsm.FilePath}");
+                            return false;
+                    }
+            }
+        }
+
+        private System.Runtime.Versioning.FrameworkName GetTargetRuntime(string filePath)
+        {
+            var assemblyDef = AssemblyDefinition.ReadAssembly(filePath);
+            var frameworkName = assemblyDef.GetFrameworkName();
+            if (string.IsNullOrEmpty(frameworkName))
+            {
+                var runtimeVersion = assemblyDef.GetRuntimeVersion();
+                frameworkName = $".NETFramework,Version=v{runtimeVersion.ToString(3)}";
+            }
+            return new System.Runtime.Versioning.FrameworkName(frameworkName);
+        }
+
+        internal void DumpExtensionPoints(string message)
+        {
+            Console.WriteLine(message);
+            foreach (var extensionPoint in _extensionPoints)
+                Console.WriteLine(extensionPoint.Path);
+            Console.WriteLine();
         }
     }
 }

@@ -1,5 +1,8 @@
 ﻿# TestCentric Metadata
 
+[![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/60b0c94pyupncxf0?svg=true)](https://ci.appveyor.com/project/CharliePoole/testcentric-extensibility)
+[![Latest NuGet Release](https://img.shields.io/nuget/vpre/TestCentric.Metadata)](https://www.nuget.org/packages/TestCentric.Extensibility)
+
 The `TestCentric.Metadata` library is used for accessing assembly metadata
 without loading the target assembly and without use of reflection. Most of
 the code is taken from `Mono.Cecil` on which it is based. The metadata may
