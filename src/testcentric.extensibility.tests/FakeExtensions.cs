@@ -3,24 +3,115 @@
 // Licensed under the MIT License. See LICENSE file in root directory.
 // ***********************************************************************
 
-using System;
+using TestCentric.Extensibility;
+using TestCentric.Engine.Services;
 
-namespace TestCentric.Extensibility
+using System.Diagnostics;
+using System;
+using System.Reflection;
+using System.Xml;
+using System.IO;
+
+namespace TestCentric.Engine.Extensibility
 {
     // Extensions
 
-    [Extension]
-    public class DoesSomething : IDoSomething { }
-
-    [Extension(Path = "/TestCentric/DoesSomething")]
-    public class DoesSomething2 : IDoSomething { }
-
-    [NUnit.Engine.Extensibility.Extension]
-    public class NUnitExtension : IDoSomething { }
-
-    [Extension(EngineVersion = "1.0.0-dev00010")] // Should not throw - bug #1
-    public class DoesSomethingElse : IDoSomethingElse { }
-
     [Extension(Enabled = false)]
-    public class DoesYetAnotherThing : IDoYetAnotherThing { }
+    public class FakeTestEventListener : ITestEventListener
+    {
+        public void OnTestEvent(string text) 
+        {
+            throw new System.NotImplementedException();
+        }
+    }
+
+    //[Extension]
+    public class FakeService : IService
+    {
+        public IServiceLocator ServiceContext { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
+
+        public ServiceStatus Status => throw new System.NotImplementedException();
+
+        public void StartService()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public void StopService()
+        {
+            throw new System.NotImplementedException();
+        }
+    }
+
+    [Extension]
+    public class FakeAgentLauncher : TestCentric.Engine.Extensibility.IAgentLauncher
+    {
+        public TestAgentInfo AgentInfo => throw new NotImplementedException();
+
+        public bool CanCreateProcess(TestPackage package)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Process CreateProcess(Guid agentId, string agencyUrl, TestPackage package)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    //[Extension]
+    public class FakeDriverFactory : IDriverFactory
+    {
+#if NETFRAMEWORK
+        public IFrameworkDriver GetDriver(AppDomain domain, AssemblyName reference)
+#else
+        public IFrameworkDriver GetDriver(AssemblyName reference)
+#endif
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool IsSupportedTestFramework(AssemblyName reference)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    //[Extension]
+    public class FakeResultWriter : IResultWriter
+    {
+        public void CheckWritability(string outputPath)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void WriteResultFile(XmlNode resultNode, string outputPath)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void WriteResultFile(XmlNode resultNode, TextWriter writer)
+        {
+            throw new NotImplementedException();
+        }
+    }
+}
+
+namespace NUnit.Engine.Extensibility
+{
+    //[Extension(Path = "/NUnit/Engine/TypeExtensions/IProjectLoader/")]
+    [Extension]
+    public class FakeProjectLoader : IProjectLoader
+    {
+        public bool CanLoadFrom(string path)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public NUnit.Engine.Extensibility.IProject LoadFrom(string path)
+        {
+            throw new System.NotImplementedException();
+        }
+    }
+
 }
