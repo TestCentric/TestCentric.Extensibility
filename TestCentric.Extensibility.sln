@@ -30,6 +30,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nuget", "nuget", "{35D000FF
 		nuget\TestCentric.Extensibility.nuspec = nuget\TestCentric.Extensibility.nuspec
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{A9672D81-95E6-4E88-A3E2-45614BC07D56}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{B038A6DB-673A-46F5-BEE9-FCBC3BF391E4}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\testcentric-extensibility.ci.yml = .github\workflows\testcentric-extensibility.ci.yml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -54,6 +61,8 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{35D000FF-2CF2-4722-9FAD-A3122B9AF266} = {5BF7211F-5504-465B-AAB8-E73860BD6A11}
+		{A9672D81-95E6-4E88-A3E2-45614BC07D56} = {5BF7211F-5504-465B-AAB8-E73860BD6A11}
+		{B038A6DB-673A-46F5-BEE9-FCBC3BF391E4} = {A9672D81-95E6-4E88-A3E2-45614BC07D56}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {54FED299-6522-4CCF-BB89-97862E41F14A}
