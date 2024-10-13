@@ -18,11 +18,13 @@ BuildSettings.Packages.Add(new NuGetPackage(
 	id: "TestCentric.Extensibility",
 	source: "nuget/TestCentric.Extensibility.nuspec",
 	checks: new PackageCheck[] {
-		HasFiles(
-			"LICENSE.txt", "README.md", "testcentric.png",
-			"lib/net20/testcentric.extensibility.dll",
-			"lib/net462/testcentric.extensibility.dll",
-			"lib/netstandard2.0/testcentric.extensibility.dll"),
+		HasFiles("LICENSE.txt", "README.md", "testcentric.png"),
+		HasDirectory("lib/net20")
+			.WithFiles("testcentric.extensibility.dll"),
+		HasDirectory("lib/net462")
+			.WithFiles("testcentric.extensibility.dll"),
+		HasDirectory("lib/netstandard2.0")
+			.WithFiles("testcentric.extensibility.dll"),
 		HasDependency("TestCentric.Metadata")
 			.WithFiles(
 				"lib/net20/testcentric.engine.metadata.dll",
