@@ -20,11 +20,11 @@ BuildSettings.Packages.Add(new NuGetPackage(
 	checks: new PackageCheck[] {
 		HasFiles("LICENSE.txt", "README.md", "testcentric.png"),
 		HasDirectory("lib/net20")
-			.WithFiles("testcentric.extensibility.dll"),
+			.WithFiles("testcentric.extensibility.dll", "testcentric.extensibility.api.dll", "nunit.engine.api.dll"),
 		HasDirectory("lib/net462")
-			.WithFiles("testcentric.extensibility.dll"),
+			.WithFiles("testcentric.extensibility.dll", "testcentric.extensibility.api.dll", "nunit.engine.api.dll"),
 		HasDirectory("lib/netstandard2.0")
-			.WithFiles("testcentric.extensibility.dll"),
+			.WithFiles("testcentric.extensibility.dll", "testcentric.extensibility.api.dll", "nunit.engine.api.dll"),
 		HasDependency("TestCentric.Metadata")
 			.WithFiles(
 				"lib/net20/testcentric.engine.metadata.dll",
