@@ -107,7 +107,7 @@ namespace TestCentric.Extensibility
         }
 
         /// <inheritdoc/>
-        public void FindExtensionPoints(params Assembly[] assemblies)
+        public IExtensionManager FindExtensionPoints(params Assembly[] assemblies)
         {
             foreach (var assembly in assemblies)
             {
@@ -137,6 +137,8 @@ namespace TestCentric.Extensibility
                     }
                 }
             }
+
+            return this;
 
             void AddExtensionPoint(string path, Type type, AssemblyName assemblyName, string description = null)
             {
@@ -178,7 +180,7 @@ namespace TestCentric.Extensibility
         }
 
         /// <inheritdoc/>
-        public void FindExtensions(string startDir)
+        public IExtensionManager FindExtensions(string startDir)
         {
             // Find potential extension assemblies
             log.Info("Initializing Extensions...");
@@ -188,6 +190,8 @@ namespace TestCentric.Extensibility
             // Check each assembly to see if it contains extensions
             foreach (var candidate in _extensionAssemblies)
                 FindExtensionsInAssembly(candidate);
+
+            return this;
         }
 
         /// <inheritdoc/>
