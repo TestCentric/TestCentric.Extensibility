@@ -55,7 +55,8 @@ namespace TestCentric.Extensibility
         /// Find all ExtensionPoints in a list of assemblies and add them to the ExtensionPoints property.
         /// </summary>
         /// <param name="assemblies">The assemblies to be examined for ExtensionPoints</param>
-        void FindExtensionPoints(params Assembly[] assemblies);
+        /// <returns>The current instance of IExtensionManager</returns>
+        IExtensionManager FindExtensionPoints(params Assembly[] assemblies);
 
         /// <summary>
         /// Gets an IExtensionPoint given its path
@@ -79,7 +80,8 @@ namespace TestCentric.Extensibility
         /// <param name="startDir">
         /// Path to the directory containing the initial .addins files used to locate extensions
         /// </param>
-        void FindExtensions(string startDir);
+        /// <returns>The current instance of IExtensionManager</returns>
+        IExtensionManager FindExtensions(string startDir);
 
         /// <summary>
         /// Enumerates all extension objects matching a given type
