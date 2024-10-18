@@ -3,8 +3,6 @@
 // Licensed under the MIT License. See LICENSE file in root directory.
 // ***********************************************************************
 
-// TODO: Get this test working under .NET 6.0
-#if NETFRAMEWORK
 using NSubstitute;
 using NUnit.Framework;
 using System;
@@ -26,6 +24,7 @@ namespace TestCentric.Extensibility
     {
         protected static readonly Assembly THIS_ASSEMBLY = typeof(ExtensionManager_NewApi).Assembly;
         protected static readonly string THIS_ASSEMBLY_DIRECTORY = Path.GetDirectoryName(THIS_ASSEMBLY.Location);
+        
         protected static readonly Assembly TESTCENTRIC_ENGINE_API = typeof(TestCentric.Engine.Extensibility.IDriverFactory).Assembly;
         protected static readonly Assembly NUNIT_ENGINE_API = typeof(NUnit.Engine.Extensibility.IDriverFactory).Assembly;
 
@@ -158,143 +157,40 @@ namespace TestCentric.Extensibility
                    .And.Property(nameof(ExtensionNode.Enabled)).True);
         }
 
-        [Test]
-        public void SkipsGracefullyLoadingOtherFrameworkExtensionAssembly()
-        {
-            //May be null on mono
-            Assume.That(Assembly.GetEntryAssembly(), Is.Not.Null, "Entry assembly is null, framework loading validation will be skipped.");
-
 #if NETCOREAPP
-        var assemblyName = Path.Combine(GetSiblingDirectory("net462"), "TestCentric.Engine.Api.dll");
+        [TestCase("netstandard2.0", ExpectedResult = true)]
+        [TestCase("net462", ExpectedResult = false)]
+        [TestCase("net20", ExpectedResult = false)]
+#elif NET40_OR_GREATER
+        [TestCase("netstandard2.0", ExpectedResult = false)]
+        [TestCase("net462", ExpectedResult = true)]
+        [TestCase("net20", ExpectedResult = true)]
 #else
-        var assemblyName = Path.Combine(GetSiblingDirectory("net6.0"), "TestCentric.Engine.Api.dll");
+        [TestCase("netstandard2.0", ExpectedResult = false)]
+        [TestCase("net462", ExpectedResult = false)]
+        [TestCase("net20", ExpectedResult = true)]
 #endif
-            Assert.That(assemblyName, Does.Exist);
-
-            var manager = new ExtensionManager();
-            //manager.FindExtensionPoints(typeof(DriverService).Assembly);
-            manager.FindExtensionPoints(typeof(Engine.ITestEngine).Assembly);
-            var extensionAssembly = new ExtensionAssembly(assemblyName, false);
-
-            Assert.That(() => manager.FindExtensionsInAssembly(extensionAssembly), Throws.Nothing);
-        }
-
-        [TestCaseSource(nameof(ValidCombos))]
-        public void ValidTargetFrameworkCombinations(FrameworkCombo combo)
+        public bool LoadTargetFramework(string tfm)
         {
-            Assert.That(() => ExtensionManager.CanLoadTargetFramework(combo.RunnerAssembly, combo.ExtensionAssembly),
-                Is.True);
-        }
-
-        [TestCaseSource(nameof(InvalidTargetFrameworkCombos))]
-        public void InvalidTargetFrameworkCombinations(FrameworkCombo combo)
-        {
-            Assert.That(() => ExtensionManager.CanLoadTargetFramework(combo.RunnerAssembly, combo.ExtensionAssembly),
-                Is.False);
-        }
-
-        [TestCaseSource(nameof(InvalidRunnerCombos))]
-        public void InvalidRunnerTargetFrameworkCombinations(FrameworkCombo combo)
-        {
-            Assert.That(() => ExtensionManager.CanLoadTargetFramework(combo.RunnerAssembly, combo.ExtensionAssembly),
-                Throws.Exception.And.Message.Contains("not .NET Standard"));
+            return ExtensionManager.CanLoadTargetFramework(THIS_ASSEMBLY, FakeExtensions(tfm));
         }
 
         #endregion
 
-        // ExtensionAssembly is internal, so cannot be part of the public test parameters
-        public struct FrameworkCombo
-        {
-            internal Assembly RunnerAssembly { get; }
-            internal ExtensionAssembly ExtensionAssembly { get; }
-
-            internal FrameworkCombo(Assembly runnerAsm, ExtensionAssembly extensionAsm)
-            {
-                RunnerAssembly = runnerAsm;
-                ExtensionAssembly = extensionAsm;
-            }
-
-            public override string ToString() =>
-                $"{RunnerAssembly.GetName()}:{ExtensionAssembly.AssemblyName}";
-        }
-
-        public static IEnumerable<TestCaseData> ValidCombos()
-        {
-#if NETCOREAPP
-            Assembly netstandard = typeof(ExtensionManager).Assembly;
-            Assembly netcore = Assembly.GetExecutingAssembly();
-
-            var extNetStandard = new ExtensionAssembly(netstandard.Location, false);
-            var extNetCore = new ExtensionAssembly(netcore.Location, false);
-
-            yield return new TestCaseData(new FrameworkCombo(netcore, extNetStandard)).SetName("ValidCombo(.NET Core, .NET Standard)");
-            yield return new TestCaseData(new FrameworkCombo(netcore, extNetCore)).SetName("ValidCombo(.NET Core, .Net Core)");
-#else
-            Assembly netFramework = typeof(ExtensionManager).Assembly;
-
-            var extNetFramework = new ExtensionAssembly(netFramework.Location, false);
-            var extNetStandard = new ExtensionAssembly(Path.Combine(TestContext.CurrentContext.TestDirectory, "TestCentric.Engine.Api.dll"), false);
-
-            yield return new TestCaseData(new FrameworkCombo(netFramework, extNetFramework)).SetName("ValidCombo(.NET Framework, .NET Framework)");
-            //yield return new TestCaseData(new FrameworkCombo(netFramework, extNetStandard)).SetName("ValidCombo(.NET Framework, .NET Standard)");
-#endif
-        }
-
-        public static IEnumerable<TestCaseData> InvalidTargetFrameworkCombos()
-        {
-#if NETCOREAPP
-            Assembly netstandard = typeof(ExtensionManager).Assembly;
-            Assembly netcore = Assembly.GetExecutingAssembly();
-
-            var extNetStandard = new ExtensionAssembly(netstandard.Location, false);
-            var extNetCore = new ExtensionAssembly(netcore.Location, false);
-            var extNetFramework = new ExtensionAssembly(Path.Combine(GetNetFrameworkSiblingDirectory(), "testcentric.engine.core.dll"), false);
-
-            yield return new TestCaseData(new FrameworkCombo(netcore, extNetFramework)).SetName("InvalidCombo(.NET Core, .NET Framework)");
-#else
-            Assembly netFramework = typeof(ExtensionManager).Assembly;
-
-
-            var netCoreAppDir = GetSiblingDirectory("net6.0");
-            var extNetStandard = new ExtensionAssembly(Path.Combine(netCoreAppDir, "TestCentric.Engine.Api.dll"), false);
-            var extNetCoreApp = new ExtensionAssembly(Path.Combine(netCoreAppDir, "TestCentric.Extensibility.dll"), false);
-
-            yield return new TestCaseData(new FrameworkCombo(netFramework, extNetCoreApp)).SetName("InvalidCombo(.NET Framework, .NET Core)");
-#endif
-
-        }
-
-        public static IEnumerable<TestCaseData> InvalidRunnerCombos()
-        {
-#if NETCOREAPP
-            Assembly netstandard = typeof(ExtensionManager).Assembly;
-            Assembly netcore = Assembly.GetExecutingAssembly();
-
-            var extNetStandard = new ExtensionAssembly(netstandard.Location, false);
-            var extNetCore = new ExtensionAssembly(netcore.Location, false);
-            var extNetFramework = new ExtensionAssembly(Path.Combine(GetNetFrameworkSiblingDirectory(), "testcentric.extensibility.tests.dll"), false);
-
-            yield return new TestCaseData(new FrameworkCombo(netstandard, extNetStandard)).SetName("InvalidCombo(.NET Standard, .NET Standard)");
-            yield return new TestCaseData(new FrameworkCombo(netstandard, extNetCore)).SetName("InvalidCombo(.NET Standard, .NET Core)");
-            yield return new TestCaseData(new FrameworkCombo(netstandard, extNetFramework)).SetName("InvalidCombo(.NET Standard, .NET Framework)");
-#else
-            return new List<TestCaseData>();
-#endif
-        }
+        private const string FAKE_EXTENSIONS_FILENAME = "TestCentric.Extensibility.FakeExtensions.dll";
+        private static readonly string FAKE_EXTENSIONS_PARENT_DIRECTORY =
+            Path.Combine(new DirectoryInfo(THIS_ASSEMBLY_DIRECTORY).Parent.Parent.FullName, "fakes");
 
         /// <summary>
-        /// Returns a directory in the parent directory that the current test assembly is in. This
-        /// is used to load assemblies that target different frameworks than the current tests. So
-        /// if these tests are in bin\release\net35 and dir is netstandard2.0, this will return
-        /// bin\release\netstandard2.0.
+        /// Returns an ExtensionAssembly referring to a particular build of the fake test extensions
+        /// assembly based on the argument provided.
         /// </summary>
-        /// <param name="dir">The sibling directory</param>
+        /// <param name="tfm">A test framework moniker. Must be one for which the fake extensions are built.</param>
         /// <returns></returns>
-        private static string GetSiblingDirectory(string dir)
+        private static ExtensionAssembly FakeExtensions(string tfm)
         {
-            var file = new FileInfo(typeof(ExtensionManagerTestBase).Assembly.Location);
-            return Path.Combine(file.Directory.Parent.FullName, dir);
+            return new ExtensionAssembly(
+                Path.Combine(FAKE_EXTENSIONS_PARENT_DIRECTORY, Path.Combine(tfm, FAKE_EXTENSIONS_FILENAME)), false);
         }
     }  
 }
-#endif
