@@ -37,6 +37,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{
 		.github\workflows\testcentric-extensibility.ci.yml = .github\workflows\testcentric-extensibility.ci.yml
 	EndProjectSection
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestCentric.Extensibility.FakeExtensions", "src\testcentric.extensibility.fakes\TestCentric.Extensibility.FakeExtensions.csproj", "{B15F3AB7-7930-4FE5-A2CC-DB61F8CFC275}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -55,6 +57,10 @@ Global
 		{BE988F0A-3337-4DC6-8915-138C4875FD04}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BE988F0A-3337-4DC6-8915-138C4875FD04}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BE988F0A-3337-4DC6-8915-138C4875FD04}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B15F3AB7-7930-4FE5-A2CC-DB61F8CFC275}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B15F3AB7-7930-4FE5-A2CC-DB61F8CFC275}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B15F3AB7-7930-4FE5-A2CC-DB61F8CFC275}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B15F3AB7-7930-4FE5-A2CC-DB61F8CFC275}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

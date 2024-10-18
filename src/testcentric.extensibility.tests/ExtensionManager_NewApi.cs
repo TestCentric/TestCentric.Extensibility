@@ -3,7 +3,6 @@
 // Licensed under the MIT License. See LICENSE file in root directory.
 // ***********************************************************************
 
-#if NETFRAMEWORK
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
@@ -40,4 +39,3 @@ namespace TestCentric.Extensibility
         }
     }
 }
-#endif

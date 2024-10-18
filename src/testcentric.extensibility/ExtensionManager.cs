@@ -5,6 +5,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using TestCentric.Metadata;
@@ -386,6 +387,14 @@ namespace TestCentric.Extensibility
                 {
                     var candidate = new ExtensionAssembly(filePath, fromWildCard);
 
+                    // Make sure we can load this assembly
+                    if (!CanLoadTargetFramework(Assembly.GetEntryAssembly(), candidate))
+                    {
+                        log.Info($"{candidate.FilePath} cannot be loaded on this runtime");
+                        return;
+                    }
+
+                    // Check to see if this is a duplicate
                     for (int i = 0; i < _extensionAssemblies.Count; i++)
                     {
                         var assembly = _extensionAssemblies[i];
@@ -399,7 +408,7 @@ namespace TestCentric.Extensibility
                             }
                             else
                                 log.Info($"  Assembly: {Path.GetFileName(filePath)} ,fromWildCard = {fromWildCard}, duplicate ignored");
-                            
+
                             return;
                         }
                     }
@@ -583,10 +592,10 @@ namespace TestCentric.Extensibility
                 case ".NETCoreApp":
                     switch (extensionFrameworkName.Identifier)
                     {
-                        case ".NetStandard":
-                        case ".NetCoreApp":
+                        case ".NETStandard":
+                        case ".NETCoreApp":
                             return true;
-                        case ".NetFramework":
+                        case ".NETFramework":
                         default:
                             log.Info($".NET Core runners require .NET Core or .NET Standard extension for {extensionAsm.FilePath}");
                             return false;
@@ -600,7 +609,7 @@ namespace TestCentric.Extensibility
                         // For .NET Framework calling .NET Standard, we only support if framework is 4.7.2 or higher
                         case ".NETStandard":
                             return extensionFrameworkName.Version >= new Version(4, 7, 2);
-                        case ".NetCoreApp":
+                        case ".NETCoreApp":
                         default:
                             log.Info($".NET Framework runners cannot load .NET Core extension {extensionAsm.FilePath}");
                             return false;

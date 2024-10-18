@@ -3,8 +3,6 @@
 // Licensed under the MIT License. See LICENSE file in root directory.
 // ***********************************************************************
 
-// TODO: Get this test working under .NET 8.0
-#if NETFRAMEWORK
 using System;
 using System.Linq;
 using System.IO;
@@ -31,7 +29,10 @@ namespace TestCentric.Extensibility
         public void CreateManager()
         {
 #pragma warning disable 612, 618
-            ExtensionManager = new ExtensionManager(TESTCENTRIC_ENGINE_API, NUNIT_ENGINE_API) { InitialAddinsDirectory = THIS_ASSEMBLY_DIRECTORY };
+            ExtensionManager = new ExtensionManager(TESTCENTRIC_ENGINE_API, NUNIT_ENGINE_API) 
+            { 
+                InitialAddinsDirectory = THIS_ASSEMBLY_DIRECTORY 
+            };
 
             if (PrefixWasProvided)
                 ExtensionManager.DefaultTypeExtensionPrefix = DefaultTypeExtensionsPath;
@@ -43,4 +44,3 @@ namespace TestCentric.Extensibility
         }
     }  
 }
-#endif

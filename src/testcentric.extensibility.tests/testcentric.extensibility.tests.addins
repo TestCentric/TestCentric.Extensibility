@@ -1,3 +1,2 @@
 # Used for unit testing - not part of distributed package
-testcentric.extensibility.tests.dll
-testcentric.extensibility.tests.exe
+../../fakes/*/TestCentric.Extensibility.FakeExtensions.dll
