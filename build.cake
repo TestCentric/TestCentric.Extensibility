@@ -33,7 +33,15 @@ BuildSettings.Packages.Add(new NuGetPackage(
 			.WithFiles(
 				"lib/net20/TestCentric.InternalTrace.dll",
 				"lib/net462/TestCentric.InternalTrace.dll",
-				"lib/netstandard2.0/TestCentric.InternalTrace.dll") }));
+				"lib/netstandard2.0/TestCentric.InternalTrace.dll") },
+	symbols: new PackageCheck[] {
+        HasDirectory("lib/net20")
+            .WithFiles("TestCentric.Extensibility.pdb", "TestCentric.Extensibility.api.pdb"),
+        HasDirectory("lib/net462")
+            .WithFiles("testcentric.extensibility.pdb", "TestCentric.Extensibility.api.pdb"),
+        HasDirectory("lib/netstandard2.0")
+            .WithFiles("testcentric.extensibility.pdb", "TestCentric.Extensibility.api.pdb"),
+    }));
 
 BuildSettings.Packages.Add(new NuGetPackage(
 	id: "TestCentric.Extensibility.Api",
