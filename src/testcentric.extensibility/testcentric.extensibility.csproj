@@ -22,7 +22,7 @@
 	</ItemGroup>
 	
 	<ItemGroup>
-		<PackageReference Include="TestCentric.Metadata" Version="3.0.2" />
+		<PackageReference Include="TestCentric.Metadata" Version="3.0.4" />
 		<PackageReference Include="TestCentric.InternalTrace" Version="1.2.1" />
 		<PackageReference Include="NUnit.Engine.Api" Version="3.16.2" />
 	</ItemGroup>

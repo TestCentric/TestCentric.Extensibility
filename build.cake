@@ -20,17 +20,15 @@ BuildSettings.Packages.Add(new NuGetPackage(
 	checks: new PackageCheck[] {
 		HasFiles("LICENSE.txt", "README.md", "testcentric.png"),
 		HasDirectory("lib/net20")
-			.WithFiles("testcentric.extensibility.dll", "testcentric.extensibility.api.dll", "nunit.engine.api.dll"),
+			.WithFiles("TestCentric.Extensibility.dll", "TestCentric.Extensibility.api.dll", "nunit.engine.api.dll"),
 		HasDirectory("lib/net462")
-			.WithFiles("testcentric.extensibility.dll", "testcentric.extensibility.api.dll", "nunit.engine.api.dll"),
+			.WithFiles("testcentric.extensibility.dll", "TestCentric.Extensibility.api.dll", "nunit.engine.api.dll"),
 		HasDirectory("lib/netstandard2.0")
-			.WithFiles("testcentric.extensibility.dll", "testcentric.extensibility.api.dll", "nunit.engine.api.dll"),
+			.WithFiles("testcentric.extensibility.dll", "TestCentric.Extensibility.api.dll", "nunit.engine.api.dll"),
 		HasDependency("TestCentric.Metadata")
 			.WithFiles(
-				"lib/net20/testcentric.engine.metadata.dll",
-				"lib/net40/testcentric.engine.metadata.dll",
-				"lib/netstandard1.6/testcentric.engine.metadata.dll",
-				"lib/netstandard2.0/testcentric.engine.metadata.dll"),
+				"lib/net20/TestCentric.Metadata.dll",
+				"lib/netstandard2.0/TestCentric.Metadata.dll"),
 		HasDependency("TestCentric.InternalTrace")
 			.WithFiles(
 				"lib/net20/TestCentric.InternalTrace.dll",

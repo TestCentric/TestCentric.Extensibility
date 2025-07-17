@@ -14,8 +14,8 @@
         <copyright>Copyright 2021-2023 (c) Charlie Poole</copyright>
         <repository url="https://github.com/TestCentric/TestCentric.Extensibility" />
         <dependencies>
-			<dependency id="TestCentric.Metadata" version="2.0.0" exclude="Build,Analyzers" />
-			<dependency id="TestCentric.InternalTrace" version="1.0.0" exclude="Build,Analyzers" />
+			<dependency id="TestCentric.Metadata" version="3.0.3" exclude="Build,Analyzers" />
+			<dependency id="TestCentric.InternalTrace" version="1.2.1" exclude="Build,Analyzers" />
 		</dependencies>
     </metadata>
 	<files>
