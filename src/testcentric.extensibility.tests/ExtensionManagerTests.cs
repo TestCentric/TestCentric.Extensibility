@@ -3,26 +3,19 @@
 // Licensed under the MIT License. See LICENSE file in root directory.
 // ***********************************************************************
 
-using NSubstitute;
 using NUnit.Framework;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-//using NUnit.Engine;
 
 namespace TestCentric.Extensibility
 {
-    // NOTE For the time being we are maintaining two APIs, the older deprecated
-    // API and the one that we will use going forward. This class is the common 
-    // base used by the tests of both APIs. At some point, the deprecated API
-    // members will be removed and this will then be combined in one class.
-
-    public abstract class ExtensionManagerTestBase
+    [TestFixture(null)]
+    [TestFixture("/TestCentric/Engine/TypeExtensions/")]
+    public class ExtensionManagerTests
     {
-        protected static readonly Assembly THIS_ASSEMBLY = typeof(ExtensionManager_NewApi).Assembly;
+        protected static readonly Assembly THIS_ASSEMBLY = typeof(ExtensionManagerTests).Assembly;
         protected static readonly string THIS_ASSEMBLY_DIRECTORY = Path.GetDirectoryName(THIS_ASSEMBLY.Location);
         
         protected static readonly Assembly TESTCENTRIC_ENGINE_API = typeof(TestCentric.Engine.Extensibility.IDriverFactory).Assembly;
@@ -31,7 +24,7 @@ namespace TestCentric.Extensibility
         protected string DefaultTypeExtensionsPath;
         protected ExtensionManager ExtensionManager;
 
-        public ExtensionManagerTestBase(string defaultTypeExtensionsPath)
+        public ExtensionManagerTests(string defaultTypeExtensionsPath)
         {
             DefaultTypeExtensionsPath = defaultTypeExtensionsPath;
 
@@ -72,6 +65,27 @@ namespace TestCentric.Extensibility
         protected string[] ExpectedExtensionPointPaths;
 
         protected Type[] ExpectedExtensionPointTypes;
+
+        [OneTimeSetUp]
+        public void CreateManager()
+        {
+            if (DefaultTypeExtensionsPath != null)
+                ExtensionManager = new ExtensionManager(DefaultTypeExtensionsPath);
+            else
+            {
+                ExtensionManager = new ExtensionManager();
+                DefaultTypeExtensionsPath = "/TestCentric/TypeExtensions/";
+            }
+
+            // Initialize ExtensionManager using extension points in TestCentric API assembly
+            // with fake extensions defined in this assembly.
+
+            ExtensionManager.FindExtensionPoints(TESTCENTRIC_ENGINE_API, NUNIT_ENGINE_API);
+            Assert.That(ExtensionManager.ExtensionPoints.Count, Is.GreaterThan(0), "No ExtensionPoints were found");
+
+            ExtensionManager.FindExtensions(THIS_ASSEMBLY_DIRECTORY);
+            Assert.That(ExtensionManager.Extensions.Count, Is.GreaterThan(0), "No Extensions were found");
+        }
 
         #region Extension Point Tests
 

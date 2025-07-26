@@ -12,38 +12,6 @@ namespace TestCentric.Extensibility
 
     public interface IExtensionManager
     {
-        #region Obsolete Properties and Methods
-
-        // NOTE: These are scheduled for removal in version 4.0 of the API.
-
-        /// <summary>
-        /// Array of assemblies whose ExtensionPoints are manaaged by this instance.
-        /// </summary>
-        [Obsolete]
-        IList<Assembly> RootAssemblies { get; }
-
-        /// <summary>
-        /// Prefix used if the Path is not specified for a TypeExtensionPoint
-        /// </summary>
-        [Obsolete]
-        string DefaultTypeExtensionPrefix { get; set; }
-
-        /// <summary>
-        /// Directory containing the initial .addins files used to locate extensions
-        /// </summary>
-        [Obsolete]
-        string InitialAddinsDirectory { get; set; }
-
-        /// <summary>
-        /// Initialize this instance of ExtensionManager by finding all extension points
-        /// and extensions. This method provides one-step initialization. The alternative
-        /// approach is to make separate calls to FindExtensionPoints and FindExtensions.
-        /// </summary>
-        [Obsolete]
-        void Initialize();
-
-        #endregion
-
         #region Extension Points
 
         /// <summary>

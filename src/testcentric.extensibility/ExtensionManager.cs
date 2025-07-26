@@ -48,56 +48,9 @@ namespace TestCentric.Extensibility
             DefaultTypeExtensionsPath = defaultTypeExtensionsPath;
         }
 
-        [Obsolete(DEPRECATED)]
-        public ExtensionManager(params Assembly[] rootAssemblies)
-        {
-            Guard.ArgumentNotNull(rootAssemblies, nameof(rootAssemblies));
-            Guard.ArgumentValid(rootAssemblies.Length > 0, "Must be a non-empty array", nameof(rootAssemblies));
-
-            RootAssemblies = rootAssemblies;
-
-            // Set default property values - may be changed before Initialization
-            DefaultTypeExtensionPrefix = DEFAULT_TYPE_EXTENSIONS_PATH;
-            InitialAddinsDirectory = Path.GetDirectoryName(RootAssemblies[0].Location);
-        }
-
         #endregion
 
         #region IExtensionManager Implementation
-
-        #region Obsolete Properties and Methods
-
-        /// <inheritdoc/>
-        [Obsolete]
-        public IList<Assembly> RootAssemblies { get; private set; }
-
-        /// <inheritdoc/>
-        [Obsolete]
-        public string DefaultTypeExtensionPrefix 
-        { 
-            get {  return DefaultTypeExtensionsPath; }
-            set {  DefaultTypeExtensionsPath = value; } 
-        }
-
-        /// <inheritdoc/>
-        [Obsolete]
-        public string InitialAddinsDirectory { get; set; }
-
-        /// <inheritdoc/>
-        /// <inheritdoc/>
-        [Obsolete]
-        public void Initialize()
-        {
-            // Find all extension points
-            log.Info("Initializing ExtensionPoints...");
-            foreach (var assembly in RootAssemblies)
-                FindExtensionPoints(assembly);
-
-            if (_extensionPoints.Count > 0)
-                FindExtensions(InitialAddinsDirectory);
-        }
-
-        #endregion
 
         #region Extension Points
 
