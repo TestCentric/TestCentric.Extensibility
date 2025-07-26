@@ -19,7 +19,6 @@ namespace TestCentric.Extensibility
         static Logger log = InternalTrace.GetLogger(typeof(ExtensionManager));
         const string DEFAULT_TYPE_EXTENSIONS_PATH = "/TestCentric/TypeExtensions/";
         private const string NUNIT_TYPE_EXTENSIONS_PATH = "/NUnit/Engine/TypeExtensions/";
-        const string DEPRECATED = "It will be removed in a future release";
 
         const string TESTCENTRIC_EXTENSION_ATTRIBUTE = "TestCentric.Extensibility.ExtensionAttribute";
         const string TESTCENTRIC_EXTENSION_PROPERTY_ATTRIBUTE = "TestCentric.Extensibility.ExtensionPropertyAttribute";
@@ -32,6 +31,10 @@ namespace TestCentric.Extensibility
 
         private readonly List<ExtensionNode> _extensions = new List<ExtensionNode>();
         private readonly List<ExtensionAssembly> _extensionAssemblies = new List<ExtensionAssembly>();
+
+        // List of all extensionDirectories specified on command-line or in environment,
+        // used to ignore duplicate calls to FindExtensionAssemblies.
+        private readonly List<string> _extensionDirectories = new List<string>();
 
         private string DefaultTypeExtensionsPath { get; set; }
 
@@ -60,7 +63,9 @@ namespace TestCentric.Extensibility
             get { return _extensionPoints.ToArray(); }
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Find the extension points in a loaded assembly.
+        /// </summary>
         public IExtensionManager FindExtensionPoints(params Assembly[] assemblies)
         {
             foreach (var assembly in assemblies)
@@ -97,7 +102,7 @@ namespace TestCentric.Extensibility
             void AddExtensionPoint(string path, Type type, AssemblyName assemblyName, string description = null)
             {
                 if (_pathIndex.ContainsKey(path))
-                    throw new Exception($"The Path {path} is already in use for another extension point.");
+                    throw new ExtensibilityException($"The Path {path} is already in use for another extension point.");
 
                 var ep = new ExtensionPoint(path, type)
                 {
@@ -372,7 +377,7 @@ namespace TestCentric.Extensibility
                 catch (BadImageFormatException e)
                 {
                     if (!fromWildCard)
-                        throw new Exception($"Specified extension {filePath} could not be read", e);
+                        throw new ExtensibilityException($"Specified extension {filePath} could not be read", e);
                 }
                 catch (Exception)
                 {
@@ -461,7 +466,7 @@ namespace TestCentric.Extensibility
             {
                 ep = DeduceExtensionPointFromType(type);
                 if (ep == null)
-                    throw new Exception($"Unable to deduce ExtensionPoint for Type {type.FullName}. Specify Path on ExtensionAttribute to resolve.");
+                    throw new ExtensibilityException($"Unable to deduce ExtensionPoint for Type {type.FullName}. Specify Path on ExtensionAttribute to resolve.");
 
                 log.Debug($"    Deduced Path {ep.Path}");
                 node.Path = ep.Path;
@@ -470,7 +475,7 @@ namespace TestCentric.Extensibility
             {
                 ep = GetExtensionPoint(node.Path);
                 if (ep == null && !fromWildCard)
-                    throw new Exception($"Unable to locate ExtensionPoint for Type {type.FullName}. The Path {node.Path} cannot be found.");
+                    throw new ExtensibilityException($"Unable to locate ExtensionPoint for Type {type.FullName}. The Path {node.Path} cannot be found.");
             }
 
             return ep;
@@ -540,7 +545,7 @@ namespace TestCentric.Extensibility
             switch (runnerFrameworkName.Identifier)
             {
                 case ".NETStandard":
-                    throw new Exception($"{runnerAsm.FullName} test runner must target .NET Core or .NET Framework, not .NET Standard");
+                    throw new NUnit.Engine.NUnitEngineException($"{runnerAsm.FullName} test runner must target .NET Core or .NET Framework, not .NET Standard");
 
                 case ".NETCoreApp":
                     switch (extensionFrameworkName.Identifier)
