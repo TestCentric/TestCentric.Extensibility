@@ -17,7 +17,7 @@ namespace TestCentric.Extensibility
     internal static class DirectoryFinder
     {
         /// <summary>
-        /// Get a list of diretories matching and extended wildcard pattern.
+        /// Get a list of directories matching and extended wildcard pattern.
         /// Each path component may have wildcard characters and a component
         /// of "**" may be used to represent all directories, recursively.
         /// </summary>
@@ -48,10 +48,10 @@ namespace TestCentric.Extensibility
                 else
                 {
                     range = pattern;
-                    pattern = "";
+                    pattern = string.Empty;
                 }
 
-                if (range == "." || range == "")
+                if (range == "." || range == string.Empty)
                     continue;
 
                 dirList = ExpandOneStep(dirList, range);
@@ -61,7 +61,7 @@ namespace TestCentric.Extensibility
         }
 
         /// <summary>
-        /// Get files using an extended pattern with the option of wildcard 
+        /// Get files using an extended pattern with the option of wildcard
         /// characters in each path component.
         /// </summary>
         /// <param name="baseDir">A DirectoryInfo from which the matching starts</param>
@@ -86,29 +86,13 @@ namespace TestCentric.Extensibility
             return fileList;
         }
 
-        public static DirectoryInfo GetPackageDirectory(DirectoryInfo startDir)
-        {
-            var dir = new DirectoryInfo(startDir.FullName).Parent;
-
-            while (dir != null)
-            {
-                string tryPath = Path.Combine(dir.FullName, "packages");
-                if (Directory.Exists(tryPath))
-                    return new DirectoryInfo(tryPath);
-
-                dir = dir.Parent;
-            }
-
-            return null;
-        }
-
         private static List<DirectoryInfo> ExpandOneStep(IList<DirectoryInfo> dirList, string pattern)
         {
             var newList = new List<DirectoryInfo>();
 
             foreach (var dir in dirList)
             {
-                if (pattern == "." || pattern == "")
+                if (pattern == "." || pattern == string.Empty)
                     newList.Add(dir);
                 else if (pattern == "..")
                 {
@@ -121,12 +105,14 @@ namespace TestCentric.Extensibility
                     // add the directory itself to start out.
                     newList.Add(dir);
                     var subDirs = dir.GetDirectories("*", SearchOption.AllDirectories);
-                    if (subDirs.Length > 0) newList.AddRange(subDirs);
+                    if (subDirs.Length > 0)
+                        newList.AddRange(subDirs);
                 }
                 else
                 {
                     var subDirs = dir.GetDirectories(pattern);
-                    if (subDirs.Length > 0) newList.AddRange(subDirs);
+                    if (subDirs.Length > 0)
+                        newList.AddRange(subDirs);
                 }
             }
 

@@ -9,7 +9,6 @@ using System.Reflection;
 
 namespace TestCentric.Extensibility
 {
-
     public interface IExtensionManager
     {
         #region Extension Points
@@ -23,15 +22,14 @@ namespace TestCentric.Extensibility
         /// Find all ExtensionPoints in a list of assemblies and add them to the ExtensionPoints property.
         /// </summary>
         /// <param name="assemblies">The assemblies to be examined for ExtensionPoints</param>
-        /// <returns>The current instance of IExtensionManager</returns>
-        IExtensionManager FindExtensionPoints(params Assembly[] assemblies);
+        void FindExtensionPoints(params Assembly[] assemblies);
 
         /// <summary>
         /// Gets an IExtensionPoint given its path
         /// </summary>
         /// <param name="path">A string representing an extension point path</param>
         /// <returns>An IExtensionPoint</returns>
-        IExtensionPoint GetExtensionPoint(string path);
+        IExtensionPoint? GetExtensionPoint(string path);
 
         #endregion
 
@@ -48,18 +46,15 @@ namespace TestCentric.Extensibility
         /// <param name="startDir">
         /// Path to the directory containing the initial .addins files used to locate extensions
         /// </param>
-        /// <returns>The current instance of IExtensionManager</returns>
-        IExtensionManager FindExtensions(string startDir);
+        void FindExtensionAssemblies(string startDir);
 
         /// <summary>
         /// Enumerates all extension objects matching a given type
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
         IEnumerable<T> GetExtensions<T>();
 
         /// <summary>
-        /// Enable or disable an extension. 
+        /// Enable or disable an extension.
         /// </summary>
         /// <remarks>
         /// The TypeName is used rather than a Type so that clients without a
@@ -76,7 +71,7 @@ namespace TestCentric.Extensibility
         /// </summary>
         /// <param name="path">A string representing an extension point path</param>
         /// <returns>An IExtensionNode</returns>
-        IExtensionNode GetExtensionNode(string path);
+        IExtensionNode? GetExtensionNode(string path);
 
         /// <summary>
         /// Enumerates all extension nodes at a given path

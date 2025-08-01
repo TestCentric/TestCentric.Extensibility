@@ -5,7 +5,7 @@
 
 using System.Runtime.CompilerServices;
 
-[assembly: InternalsVisibleTo("testcentric.extensibility.tests, PublicKey="+
+[assembly: InternalsVisibleTo("testcentric.extensibility.tests, PublicKey=" +
     "00240000048000009400000006020000002400005253413100040000010001005171b59e932aa5" +
     "3acd8d9dca80cd505543204eb39e8ba2587c85e266a8100322053d51a43ee239ebd7d1dc9db8c1" +
     "4e558fbb873e1606d762fcf8c91538564707a1862833123b95b70ace974428cb88f2e023e2b382" +

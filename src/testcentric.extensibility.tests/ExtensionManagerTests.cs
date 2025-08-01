@@ -17,7 +17,7 @@ namespace TestCentric.Extensibility
     {
         protected static readonly Assembly THIS_ASSEMBLY = typeof(ExtensionManagerTests).Assembly;
         protected static readonly string THIS_ASSEMBLY_DIRECTORY = Path.GetDirectoryName(THIS_ASSEMBLY.Location);
-        
+
         protected static readonly Assembly TESTCENTRIC_ENGINE_API = typeof(TestCentric.Engine.Extensibility.IDriverFactory).Assembly;
         protected static readonly Assembly NUNIT_ENGINE_API = typeof(NUnit.Engine.Extensibility.IDriverFactory).Assembly;
 
@@ -30,7 +30,7 @@ namespace TestCentric.Extensibility
 
             var prefix = defaultTypeExtensionsPath ?? "/TestCentric/TypeExtensions/";
 
-            ExpectedExtensionPointPaths = new[] 
+            ExpectedExtensionPointPaths = new[]
             {
                 prefix + "ITestEventListener",
                 prefix + "IService",
@@ -45,7 +45,7 @@ namespace TestCentric.Extensibility
                 "/NUnit/Engine/TypeExtensions/IResultWriter"
             };
 
-            // This could be initialized inline, but it's here for clarity            
+            // This could be initialized inline, but it's here for clarity
             ExpectedExtensionPointTypes = new[]
             {
                 typeof(TestCentric.Engine.ITestEventListener),
@@ -69,13 +69,9 @@ namespace TestCentric.Extensibility
         [OneTimeSetUp]
         public void CreateManager()
         {
+            ExtensionManager = new ExtensionManager();
             if (DefaultTypeExtensionsPath != null)
-                ExtensionManager = new ExtensionManager(DefaultTypeExtensionsPath);
-            else
-            {
-                ExtensionManager = new ExtensionManager();
-                DefaultTypeExtensionsPath = "/TestCentric/TypeExtensions/";
-            }
+                ExtensionManager.TypeExtensionPath = DefaultTypeExtensionsPath;
 
             // Initialize ExtensionManager using extension points in TestCentric API assembly
             // with fake extensions defined in this assembly.
@@ -83,7 +79,8 @@ namespace TestCentric.Extensibility
             ExtensionManager.FindExtensionPoints(TESTCENTRIC_ENGINE_API, NUNIT_ENGINE_API);
             Assert.That(ExtensionManager.ExtensionPoints.Count, Is.GreaterThan(0), "No ExtensionPoints were found");
 
-            ExtensionManager.FindExtensions(THIS_ASSEMBLY_DIRECTORY);
+            ExtensionManager.FindExtensionAssemblies(FAKE_EXTENSIONS_PARENT_DIRECTORY);
+            ExtensionManager.LoadExtensions();
             Assert.That(ExtensionManager.Extensions.Count, Is.GreaterThan(0), "No Extensions were found");
         }
 
@@ -92,8 +89,8 @@ namespace TestCentric.Extensibility
         [Test]
         public void AllExtensionPointsAreKnown()
         {
-            Assert.That(ExtensionManager.ExtensionPoints.Select(ep => ep.Path), 
-                Is.EquivalentTo(ExpectedExtensionPointPaths) );
+            Assert.That(ExtensionManager.ExtensionPoints.Select(ep => ep.Path),
+                Is.EquivalentTo(ExpectedExtensionPointPaths));
         }
 
         [Test]
@@ -134,17 +131,20 @@ namespace TestCentric.Extensibility
             Assert.That(ExtensionManager.GetExtensionPoint(typeof(ThisIsNotAnExtensionPoint)), Is.Null);
         }
 
-        class ThisIsNotAnExtensionPoint { }
+        internal class ThisIsNotAnExtensionPoint
+        {
+        }
 
         #endregion
 
         #region Extensions
 
-        static string[] KnownExtensionTypeNames = new[] {
+        private static string[] KnownExtensionTypeNames =
+        [
             "TestCentric.Engine.Extensibility.FakeAgentLauncher",
             "TestCentric.Engine.Extensibility.FakeTestEventListener",
             "NUnit.Engine.Extensibility.FakeProjectLoader"
-        };
+        ];
 
         [Test]
         public void AllExtensionsAreKnown()
@@ -206,5 +206,5 @@ namespace TestCentric.Extensibility
             return new ExtensionAssembly(
                 Path.Combine(FAKE_EXTENSIONS_PARENT_DIRECTORY, Path.Combine(tfm, FAKE_EXTENSIONS_FILENAME)), false);
         }
-    }  
+    }
 }

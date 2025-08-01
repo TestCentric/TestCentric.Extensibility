@@ -35,10 +35,11 @@
 		<PackageReference Include="NUnit.Engine.Api" Version="3.16.2" />
 	</ItemGroup>
 
-	<ItemGroup>
-	  <None Update="TestCentric.Extensibility.Tests.addins">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </None>
-	</ItemGroup>
-	
+	<Target Name="CopyAddinsFile" AfterTargets="Build">
+		<Copy
+			SourceFiles="testCentric.extensibility.tests.addins"
+			DestinationFolder="$(SolutionDir)bin\$(Configuration)\fakes"
+			SkipUnchangedFiles="true" />
+	</Target>
+
 </Project>

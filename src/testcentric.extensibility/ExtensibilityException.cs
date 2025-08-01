@@ -9,8 +9,8 @@ using System.Runtime.Serialization;
 namespace TestCentric.Extensibility
 {
     /// <summary>
-    /// NUnitEngineException is thrown when the engine has been
-    /// called with improper values or when a particular facility
+    /// ExtensibilityException is thrown when the extensibility features
+    /// are used with improper values or when a particular feature
     /// is not available.
     /// </summary>
     [Serializable]
@@ -26,7 +26,7 @@ namespace TestCentric.Extensibility
         /// <summary>
         /// Construct with a message and inner exception
         /// </summary>
-        public ExtensibilityException(string message, Exception? innerException) : base(message, innerException)
+        public ExtensibilityException(string message, Exception innerException) : base(message, innerException)
         {
         }
 

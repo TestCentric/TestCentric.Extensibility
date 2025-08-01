@@ -19,7 +19,7 @@ namespace TestCentric.Engine.Extensibility
     [Extension(Enabled = false)]
     public class FakeTestEventListener : ITestEventListener
     {
-        public void OnTestEvent(string text) 
+        public void OnTestEvent(string text)
         {
             throw new System.NotImplementedException();
         }
@@ -113,5 +113,4 @@ namespace NUnit.Engine.Extensibility
             throw new System.NotImplementedException();
         }
     }
-
 }
