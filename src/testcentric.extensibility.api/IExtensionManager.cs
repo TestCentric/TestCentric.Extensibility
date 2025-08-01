@@ -9,41 +9,8 @@ using System.Reflection;
 
 namespace TestCentric.Extensibility
 {
-
     public interface IExtensionManager
     {
-        #region Obsolete Properties and Methods
-
-        // NOTE: These are scheduled for removal in version 4.0 of the API.
-
-        /// <summary>
-        /// Array of assemblies whose ExtensionPoints are manaaged by this instance.
-        /// </summary>
-        [Obsolete]
-        IList<Assembly> RootAssemblies { get; }
-
-        /// <summary>
-        /// Prefix used if the Path is not specified for a TypeExtensionPoint
-        /// </summary>
-        [Obsolete]
-        string DefaultTypeExtensionPrefix { get; set; }
-
-        /// <summary>
-        /// Directory containing the initial .addins files used to locate extensions
-        /// </summary>
-        [Obsolete]
-        string InitialAddinsDirectory { get; set; }
-
-        /// <summary>
-        /// Initialize this instance of ExtensionManager by finding all extension points
-        /// and extensions. This method provides one-step initialization. The alternative
-        /// approach is to make separate calls to FindExtensionPoints and FindExtensions.
-        /// </summary>
-        [Obsolete]
-        void Initialize();
-
-        #endregion
-
         #region Extension Points
 
         /// <summary>
@@ -55,15 +22,14 @@ namespace TestCentric.Extensibility
         /// Find all ExtensionPoints in a list of assemblies and add them to the ExtensionPoints property.
         /// </summary>
         /// <param name="assemblies">The assemblies to be examined for ExtensionPoints</param>
-        /// <returns>The current instance of IExtensionManager</returns>
-        IExtensionManager FindExtensionPoints(params Assembly[] assemblies);
+        void FindExtensionPoints(params Assembly[] assemblies);
 
         /// <summary>
         /// Gets an IExtensionPoint given its path
         /// </summary>
         /// <param name="path">A string representing an extension point path</param>
         /// <returns>An IExtensionPoint</returns>
-        IExtensionPoint GetExtensionPoint(string path);
+        IExtensionPoint? GetExtensionPoint(string path);
 
         #endregion
 
@@ -80,18 +46,15 @@ namespace TestCentric.Extensibility
         /// <param name="startDir">
         /// Path to the directory containing the initial .addins files used to locate extensions
         /// </param>
-        /// <returns>The current instance of IExtensionManager</returns>
-        IExtensionManager FindExtensions(string startDir);
+        void FindExtensionAssemblies(string startDir);
 
         /// <summary>
         /// Enumerates all extension objects matching a given type
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
         IEnumerable<T> GetExtensions<T>();
 
         /// <summary>
-        /// Enable or disable an extension. 
+        /// Enable or disable an extension.
         /// </summary>
         /// <remarks>
         /// The TypeName is used rather than a Type so that clients without a
@@ -108,7 +71,7 @@ namespace TestCentric.Extensibility
         /// </summary>
         /// <param name="path">A string representing an extension point path</param>
         /// <returns>An IExtensionNode</returns>
-        IExtensionNode GetExtensionNode(string path);
+        IExtensionNode? GetExtensionNode(string path);
 
         /// <summary>
         /// Enumerates all extension nodes at a given path

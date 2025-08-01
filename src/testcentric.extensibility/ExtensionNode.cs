@@ -5,10 +5,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.Reflection;
-#if !NETFRAMEWORK
+#if !NET20
 using System.Linq;
 #endif
+using System.Reflection;
 
 namespace TestCentric.Extensibility
 {
@@ -19,9 +19,10 @@ namespace TestCentric.Extensibility
     /// </summary>
     public class ExtensionNode : IExtensionNode
     {
-        private object _extensionObject;
-        private Dictionary<string, List<string>> _properties = new Dictionary<string, List<string>>();
+        private static readonly Logger log = InternalTrace.GetLogger(typeof(ExtensionNode));
 
+        private object? _extensionObject;
+        private readonly Dictionary<string, List<string>> _properties = new Dictionary<string, List<string>>();
 
         /// <summary>
         /// Construct an ExtensionNode supplying the assembly path and type name.
@@ -29,47 +30,48 @@ namespace TestCentric.Extensibility
         /// <param name="assemblyPath">The path to the assembly where this extension is found.</param>
         /// <param name="assemblyVersion">The version of the extension assembly.</param>
         /// <param name="typeName">The full name of the Type of the extension object.</param>
-        /// <param name="targetFramework">The target framework of the extension assembly.</param>
         public ExtensionNode(string assemblyPath, Version assemblyVersion, string typeName)
         {
             AssemblyPath = assemblyPath;
             AssemblyVersion = assemblyVersion;
             TypeName = typeName;
-            //TargetFramework = targetFramework;
             Enabled = true; // By default
         }
 
         #region IExtensionNode Implementation
 
         /// <summary>
+        /// Gets the path to the assembly where the extension is defined.
+        /// </summary>
+        public string AssemblyPath { get; }
+
+        /// <summary>
+        /// Gets the version of the extension assembly.
+        /// </summary>
+        public Version AssemblyVersion { get; }
+
+        /// <summary>
         /// Gets the full name of the Type of the extension object.
         /// </summary>
-        public string TypeName { get; private set; }
+        public string TypeName { get; }
 
         /// <summary>
         /// Gets or sets a value indicating whether this <see cref="TestCentric.Engine.Extensibility.ExtensionNode"/> is enabled.
         /// </summary>
         /// <value><c>true</c> if enabled; otherwise, <c>false</c>.</value>
-        public bool Enabled	{ get; set; }
+        public bool Enabled { get; set; }
 
         /// <summary>
         /// Gets and sets the unique string identifying the ExtensionPoint for which
         /// this Extension is intended. This identifier may be supplied by the attribute
         /// marking the extension or deduced by NUnit from the Type of the extension class.
         /// </summary>
-        public string Path { get; set; }
+        public string? Path { get; set; }
 
         /// <summary>
         /// An optional description of what the extension does.
         /// </summary>
-        public string Description { get; set; }
-
-        /// <summary>
-        /// The TargetFramework of the extension assembly.
-        /// </summary>
-        // TODO: Determine whether we need this or some other kind
-        // of info about the target framework.
-        //public IRuntimeFramework TargetFramework { get; }
+        public string? Description { get; set; }
 
         /// <summary>
         /// Gets a collection of the names of all this extension's properties
@@ -80,16 +82,6 @@ namespace TestCentric.Extensibility
         }
 
         /// <summary>
-        /// Gets the path to the assembly where the extension is defined.
-        /// </summary>
-        public string AssemblyPath { get; private set; }
-
-        /// <summary>
-        /// Gets the version of the extension assembly.
-        /// </summary>
-        public Version AssemblyVersion { get; private set; }
-
-        /// <summary>
         /// Gets a collection of the values of a particular named property.
         /// If none are present, returns an empty enumerator.
         /// </summary>
@@ -97,13 +89,15 @@ namespace TestCentric.Extensibility
         /// <returns>A collection of values</returns>
         public IEnumerable<string> GetValues(string name)
         {
-            if (_properties.ContainsKey(name))
-                return _properties[name];
+            if (_properties.TryGetValue(name, out List<string>? value))
+                return value;
             else
+#if NET20
                 return new string[0];
+#else
+                return Enumerable.Empty<string>();
+#endif
         }
-
-        #endregion
 
         /// <summary>
         /// Gets an object of the specified extension type, loading the Assembly
@@ -115,7 +109,7 @@ namespace TestCentric.Extensibility
         {
             get
             {
-                if (_extensionObject == null)
+                if (_extensionObject is null)
                     _extensionObject = CreateExtensionObject();
 
                 return _extensionObject;
@@ -127,25 +121,25 @@ namespace TestCentric.Extensibility
         /// </summary>
         public object CreateExtensionObject(params object[] args)
         {
-#if NETFRAMEWORK            
-            return AppDomain.CurrentDomain.CreateInstanceFromAndUnwrap(AssemblyPath, TypeName, false, 0, null, args, null, null, null);
+#if NETFRAMEWORK
+            return AppDomain.CurrentDomain.CreateInstanceFromAndUnwrap(
+                AssemblyPath, TypeName, false, 0, null, args, null, null, null);
 #else
             var assembly = Assembly.LoadFrom(AssemblyPath);
-            var typeinfo = assembly.DefinedTypes.FirstOrDefault(t => t.FullName == TypeName);
-            return typeinfo != null
-                ? Activator.CreateInstance(typeinfo.AsType(), args)
-                : null;
+            var type = assembly.GetType(TypeName, throwOnError: true)!;
+            return Activator.CreateInstance(type, args)!;
 #endif
         }
 
+#endregion
+
         public void AddProperty(string name, string val)
         {
-            if (_properties.ContainsKey(name))
-                _properties[name].Add(val);
+            if (_properties.TryGetValue(name, out List<string>? list))
+                list.Add(val);
             else
             {
-                var list = new List<string>();
-                list.Add(val);
+                list = new List<string> { val };
                 _properties.Add(name, list);
             }
         }

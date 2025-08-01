@@ -10,13 +10,13 @@ namespace TestCentric.Extensibility
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
     public class ExtensionAttribute : Attribute
     {
-        public string Path { get; set; }
+        public string? Path { get; set; }
 
-        public string Description { get; set; }
+        public string? Description { get; set; }
 
         public bool Enabled { get; set; }
 
-        public string EngineVersion { get; set; }
+        public string? EngineVersion { get; set; }
 
         public ExtensionAttribute()
         {

@@ -34,7 +34,7 @@ namespace TestCentric.Extensibility
             ArgumentNotNull(value, name);
 
             if (value == string.Empty)
-                throw new ArgumentException("Argument " + name +" must not be the empty string", name);
+                throw new ArgumentException("Argument " + name + " must not be the empty string", name);
         }
 
         /// <summary>

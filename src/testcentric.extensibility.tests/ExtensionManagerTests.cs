@@ -3,41 +3,34 @@
 // Licensed under the MIT License. See LICENSE file in root directory.
 // ***********************************************************************
 
-using NSubstitute;
 using NUnit.Framework;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-//using NUnit.Engine;
 
 namespace TestCentric.Extensibility
 {
-    // NOTE For the time being we are maintaining two APIs, the older deprecated
-    // API and the one that we will use going forward. This class is the common 
-    // base used by the tests of both APIs. At some point, the deprecated API
-    // members will be removed and this will then be combined in one class.
-
-    public abstract class ExtensionManagerTestBase
+    [TestFixture(null)]
+    [TestFixture("/TestCentric/Engine/TypeExtensions/")]
+    public class ExtensionManagerTests
     {
-        protected static readonly Assembly THIS_ASSEMBLY = typeof(ExtensionManager_NewApi).Assembly;
+        protected static readonly Assembly THIS_ASSEMBLY = typeof(ExtensionManagerTests).Assembly;
         protected static readonly string THIS_ASSEMBLY_DIRECTORY = Path.GetDirectoryName(THIS_ASSEMBLY.Location);
-        
+
         protected static readonly Assembly TESTCENTRIC_ENGINE_API = typeof(TestCentric.Engine.Extensibility.IDriverFactory).Assembly;
         protected static readonly Assembly NUNIT_ENGINE_API = typeof(NUnit.Engine.Extensibility.IDriverFactory).Assembly;
 
         protected string DefaultTypeExtensionsPath;
         protected ExtensionManager ExtensionManager;
 
-        public ExtensionManagerTestBase(string defaultTypeExtensionsPath)
+        public ExtensionManagerTests(string defaultTypeExtensionsPath)
         {
             DefaultTypeExtensionsPath = defaultTypeExtensionsPath;
 
             var prefix = defaultTypeExtensionsPath ?? "/TestCentric/TypeExtensions/";
 
-            ExpectedExtensionPointPaths = new[] 
+            ExpectedExtensionPointPaths = new[]
             {
                 prefix + "ITestEventListener",
                 prefix + "IService",
@@ -52,7 +45,7 @@ namespace TestCentric.Extensibility
                 "/NUnit/Engine/TypeExtensions/IResultWriter"
             };
 
-            // This could be initialized inline, but it's here for clarity            
+            // This could be initialized inline, but it's here for clarity
             ExpectedExtensionPointTypes = new[]
             {
                 typeof(TestCentric.Engine.ITestEventListener),
@@ -73,13 +66,31 @@ namespace TestCentric.Extensibility
 
         protected Type[] ExpectedExtensionPointTypes;
 
+        [OneTimeSetUp]
+        public void CreateManager()
+        {
+            ExtensionManager = new ExtensionManager();
+            if (DefaultTypeExtensionsPath != null)
+                ExtensionManager.TypeExtensionPath = DefaultTypeExtensionsPath;
+
+            // Initialize ExtensionManager using extension points in TestCentric API assembly
+            // with fake extensions defined in this assembly.
+
+            ExtensionManager.FindExtensionPoints(TESTCENTRIC_ENGINE_API, NUNIT_ENGINE_API);
+            Assert.That(ExtensionManager.ExtensionPoints.Count, Is.GreaterThan(0), "No ExtensionPoints were found");
+
+            ExtensionManager.FindExtensionAssemblies(FAKE_EXTENSIONS_PARENT_DIRECTORY);
+            ExtensionManager.LoadExtensions();
+            Assert.That(ExtensionManager.Extensions.Count, Is.GreaterThan(0), "No Extensions were found");
+        }
+
         #region Extension Point Tests
 
         [Test]
         public void AllExtensionPointsAreKnown()
         {
-            Assert.That(ExtensionManager.ExtensionPoints.Select(ep => ep.Path), 
-                Is.EquivalentTo(ExpectedExtensionPointPaths) );
+            Assert.That(ExtensionManager.ExtensionPoints.Select(ep => ep.Path),
+                Is.EquivalentTo(ExpectedExtensionPointPaths));
         }
 
         [Test]
@@ -120,17 +131,20 @@ namespace TestCentric.Extensibility
             Assert.That(ExtensionManager.GetExtensionPoint(typeof(ThisIsNotAnExtensionPoint)), Is.Null);
         }
 
-        class ThisIsNotAnExtensionPoint { }
+        internal class ThisIsNotAnExtensionPoint
+        {
+        }
 
         #endregion
 
         #region Extensions
 
-        static string[] KnownExtensionTypeNames = new[] {
+        private static string[] KnownExtensionTypeNames =
+        [
             "TestCentric.Engine.Extensibility.FakeAgentLauncher",
             "TestCentric.Engine.Extensibility.FakeTestEventListener",
             "NUnit.Engine.Extensibility.FakeProjectLoader"
-        };
+        ];
 
         [Test]
         public void AllExtensionsAreKnown()
@@ -192,5 +206,5 @@ namespace TestCentric.Extensibility
             return new ExtensionAssembly(
                 Path.Combine(FAKE_EXTENSIONS_PARENT_DIRECTORY, Path.Combine(tfm, FAKE_EXTENSIONS_FILENAME)), false);
         }
-    }  
+    }
 }

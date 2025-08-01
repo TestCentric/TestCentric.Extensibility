@@ -19,86 +19,35 @@ namespace System.Runtime.Versioning
         private const string FRAMEWORK_NAME_VERSION_INVALID = "The specified Version is invalid";
         private const string FRAMEWORK_NAME_COMPONENT_COUNT = "FrameworkName must specify either two or three components";
 
-        private readonly string _identifier;
-        private readonly Version _version = null;
-        private readonly string _profile;
-        private string _fullName;
+        public string Identifier { get; }
 
-        private const char COMPONENT_SEPARATOR = ',';
-        private const char KEY_VALUE_SEPARATOR = '=';
-        private const char VERSION_PREFIX = 'v';
-        private const string VERSION_KEY = "Version";
-        private const string PROFILE_KEY = "Profile";
+        public Version Version { get; }
 
-        private static readonly char[] COMPONENT_SPLIT_SEPARATOR = { COMPONENT_SEPARATOR };
+        public string Profile { get; }
 
-        public string Identifier
-        {
-            get
-            {
-                Debug.Assert(_identifier != null);
-                return _identifier;
-            }
-        }
+        public string FullName { get; }
+        //{
+        //    get
+        //    {
+        //        if (_fullName == null)
+        //        {
 
-        public Version Version
-        {
-            get
-            {
-                Debug.Assert(_version != null);
-                return _version;
-            }
-        }
+//        }
 
-        public string Profile
-        {
-            get
-            {
-                Debug.Assert(_profile != null);
-                return _profile;
-            }
-        }
-
-        public string FullName
-        {
-            get
-            {
-                if (_fullName == null)
-                {
-                    if (string.IsNullOrEmpty(Profile))
-                    {
-                        _fullName =
-                            Identifier +
-                            COMPONENT_SEPARATOR + VERSION_KEY + KEY_VALUE_SEPARATOR + VERSION_PREFIX +
-                            Version.ToString();
-                    }
-                    else
-                    {
-                        _fullName =
-                            Identifier +
-                            COMPONENT_SEPARATOR + VERSION_KEY + KEY_VALUE_SEPARATOR + VERSION_PREFIX +
-                            Version.ToString() +
-                            COMPONENT_SEPARATOR + PROFILE_KEY + KEY_VALUE_SEPARATOR +
-                            Profile;
-                    }
-                }
-
-                Debug.Assert(_fullName != null);
-                return _fullName;
-            }
-        }
+//        Debug.Assert(_fullName != null);
+//        return _fullName;
+//    }
+//}
 
         public override bool Equals(object obj)
         {
             return Equals(obj as FrameworkName);
         }
 
-        public bool Equals(FrameworkName other)
+        public bool Equals(FrameworkName? other)
         {
             if (other is null)
-            {
                 return false;
-            }
 
             return Identifier == other.Identifier &&
                 Version == other.Version &&
@@ -120,7 +69,7 @@ namespace System.Runtime.Versioning
         {
         }
 
-        public FrameworkName(string identifier, Version version, string profile=null)
+        public FrameworkName(string identifier, Version version, string? profile = null)
         {
             Guard.ArgumentNotNull(identifier, nameof(identifier));
             Guard.ArgumentNotNull(version, nameof(version));
@@ -128,9 +77,12 @@ namespace System.Runtime.Versioning
             identifier = identifier.Trim();
             Guard.ArgumentNotNullOrEmpty(identifier, nameof(identifier));
 
-            _identifier = identifier;
-            _version = version;
-            _profile = (profile == null) ? string.Empty : profile.Trim();
+            Identifier = identifier;
+            Version = version;
+            Profile = (profile == null) ? string.Empty : profile.Trim();
+            FullName = $"{Identifier},Version=v{Version.ToString()}";
+            if (!string.IsNullOrEmpty(Profile))
+                FullName += $",Profile={Profile}";
         }
 
         // Parses strings in the following format: "<identifier>, Version=[v|V]<version>, Profile=<profile>"
@@ -141,21 +93,20 @@ namespace System.Runtime.Versioning
         {
             Guard.ArgumentNotNullOrEmpty(frameworkName, nameof(frameworkName));
 
-            string[] components = frameworkName.Split(COMPONENT_SPLIT_SEPARATOR);
+            string[] components = frameworkName.Split([',']);
 
             // Identifier and Version are required, Profile is optional.
-            Guard.ArgumentValid(components.Length == 2 || components.Length == 3, 
-                FRAMEWORK_NAME_COMPONENT_COUNT, nameof(frameworkName));
+            if (components.Length < 2 || components.Length > 3)
+                throw new ArgumentException(FRAMEWORK_NAME_COMPONENT_COUNT, nameof(frameworkName));
 
             //
             // 1) Parse the "Identifier", which must come first. Trim any whitespace
             //
-            _identifier = components[0].Trim();
+            Identifier = components[0].Trim();
+            if (string.IsNullOrEmpty(Identifier))
+                throw new ArgumentException(FRAMEWORK_NAME_INVALID, nameof(frameworkName));
 
-            Guard.ArgumentValid(_identifier.Length > 0, FRAMEWORK_NAME_INVALID, nameof(frameworkName));
-
-            bool versionFound = false;
-            _profile = string.Empty;
+            Profile = string.Empty;
 
             //
             // The required "Version" and optional "Profile" component can be in any order
@@ -164,9 +115,9 @@ namespace System.Runtime.Versioning
             {
                 // Get the key/value pair separated by '='
                 string component = components[i];
-                int separatorIndex = component.IndexOf(KEY_VALUE_SEPARATOR);
+                int separatorIndex = component.IndexOf('=');
 
-                Guard.ArgumentValid(separatorIndex >= 0 && separatorIndex == component.LastIndexOf(KEY_VALUE_SEPARATOR),
+                Guard.ArgumentValid(separatorIndex >= 0 && separatorIndex == component.LastIndexOf('='),
                     FRAMEWORK_NAME_INVALID, nameof(frameworkName));
 
                 // Get the key and value, trimming any whitespace
@@ -176,17 +127,15 @@ namespace System.Runtime.Versioning
                 //
                 // 2) Parse the required "Version" key value
                 //
-                if (key.Equals(VERSION_KEY, StringComparison.OrdinalIgnoreCase))
+                if (key.Equals("Version", StringComparison.OrdinalIgnoreCase))
                 {
-                    versionFound = true;
-
                     // Allow the version to include a 'v' or 'V' prefix...
-                    if (value.Length > 0 && (value[0] == VERSION_PREFIX || value[0] == 'V'))
+                    if (value.Length > 0 && (value[0] == 'v' || value[0] == 'V'))
                         value = value.Substring(1);
 
                     try
                     {
-                        _version = new Version(value);
+                        Version = new Version(value);
                     }
                     catch (Exception e)
                     {
@@ -196,11 +145,11 @@ namespace System.Runtime.Versioning
                 //
                 // 3) Parse the optional "Profile" key value
                 //
-                else if (key.Equals(PROFILE_KEY, StringComparison.OrdinalIgnoreCase))
+                else if (key.Equals("Profile", StringComparison.OrdinalIgnoreCase))
                 {
                     if (value.Length > 0)
                     {
-                        _profile = value.ToString();
+                        Profile = value.ToString();
                     }
                 }
                 else
@@ -209,8 +158,12 @@ namespace System.Runtime.Versioning
                 }
             }
 
-            if (!versionFound)
+            if (Version is null)
                 throw new ArgumentException(FRAMEWORK_NAME_VERSION_REQUIRED, nameof(frameworkName));
+
+            FullName = $"{Identifier},Version=v{Version.ToString()}";
+            if (!string.IsNullOrEmpty(Profile))
+                FullName += $",Profile={Profile}";
         }
 
         public static bool operator ==(FrameworkName left, FrameworkName right)

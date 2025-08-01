@@ -64,4 +64,3 @@ namespace TestCentric.Extensibility
 #endif
     }
 }
-

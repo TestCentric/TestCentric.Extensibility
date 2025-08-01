@@ -50,16 +50,5 @@ namespace TestCentric.Extensibility
             var files = DirectoryFinder.GetFiles(_baseDir, pattern);
             Assert.That(files.Count, Is.EqualTo(count));
         }
-
-        [Test]
-        public void GetPackageDirectory()
-        {
-            // Test only makes sense if run as part of the NUnit solution
-            string solutionDir = _baseDir.Parent.Parent.FullName;
-            Assume.That(File.Exists(Path.Combine(solutionDir, "nunit.sln")));
-
-            string expected = Path.Combine(solutionDir, "packages");
-            Assert.That(DirectoryFinder.GetPackageDirectory(_baseDir).FullName, Is.EqualTo(expected));
-        }
     }
 }
