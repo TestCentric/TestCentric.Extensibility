@@ -121,14 +121,23 @@ namespace TestCentric.Extensibility
         /// </summary>
         public object CreateExtensionObject(params object[] args)
         {
+            try
+            {
 #if NETFRAMEWORK
             return AppDomain.CurrentDomain.CreateInstanceFromAndUnwrap(
                 AssemblyPath, TypeName, false, 0, null, args, null, null, null);
 #else
-            var assembly = Assembly.LoadFrom(AssemblyPath);
-            var type = assembly.GetType(TypeName, throwOnError: true)!;
-            return Activator.CreateInstance(type, args)!;
+                var assembly = Assembly.LoadFrom(AssemblyPath);
+                var type = assembly.GetType(TypeName, throwOnError: true)!;
+                return Activator.CreateInstance(type, args)!;
 #endif
+            }
+            catch (Exception ex)
+            {
+                if (ex is TargetInvocationException)
+                    ex = ex.InnerException;
+                throw new ExtensibilityException("Error in constructing extension object", ex);
+            }
         }
 
 #endregion
