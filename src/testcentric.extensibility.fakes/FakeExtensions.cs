@@ -95,6 +95,20 @@ namespace TestCentric.Engine.Extensibility
             throw new NotImplementedException();
         }
     }
+
+    [Extension(Enabled = false)]
+    public class FakeExtension_ThrowsInConstructor : ITestEventListener
+    {
+        public FakeExtension_ThrowsInConstructor()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void OnTestEvent(string text)
+        {
+            throw new System.NotImplementedException();
+        }
+    }
 }
 
 namespace NUnit.Engine.Extensibility

@@ -143,6 +143,7 @@ namespace TestCentric.Extensibility
         [
             "TestCentric.Engine.Extensibility.FakeAgentLauncher",
             "TestCentric.Engine.Extensibility.FakeTestEventListener",
+            "TestCentric.Engine.Extensibility.FakeExtension_ThrowsInConstructor",
             "NUnit.Engine.Extensibility.FakeProjectLoader"
         ];
 
@@ -169,6 +170,18 @@ namespace TestCentric.Extensibility
             Assert.That(ExtensionManager.Extensions,
                 Has.One.Property(nameof(ExtensionNode.TypeName)).EqualTo("TestCentric.Engine.Extensibility.FakeTestEventListener")
                    .And.Property(nameof(ExtensionNode.Enabled)).True);
+        }
+
+        [Test]
+        public void ExtensionThrowsInConstructor()
+        {
+            string typeName = "TestCentric.Engine.Extensibility.FakeExtension_ThrowsInConstructor";
+            var iexNode = ExtensionManager.Extensions.Where(n => n.TypeName == typeName).Single();
+            var exNode = iexNode as ExtensionNode;
+
+            // Demonstrates that the exception is caused when ExtensionObject is accessed
+            var tiex = Assert.Throws<ExtensibilityException>(() => { var o = exNode.ExtensionObject; });
+            Assert.That(tiex.InnerException, Is.InstanceOf<NotImplementedException>());
         }
 
 #if NETCOREAPP
