@@ -80,7 +80,7 @@ namespace TestCentric.Extensibility
             Assert.That(ExtensionManager.ExtensionPoints.Count, Is.GreaterThan(0), "No ExtensionPoints were found");
 
             ExtensionManager.FindExtensionAssemblies(FAKE_EXTENSIONS_PARENT_DIRECTORY);
-            ExtensionManager.LoadExtensions();
+            ExtensionManager.FindAllExtensions();
             Assert.That(ExtensionManager.Extensions.Count, Is.GreaterThan(0), "No Extensions were found");
         }
 
