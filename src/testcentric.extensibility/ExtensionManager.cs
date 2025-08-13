@@ -47,7 +47,8 @@ namespace TestCentric.Extensibility
         // List of ExtensionNodes for all extensions discovered.
         private readonly List<ExtensionNode> _extensions = new List<ExtensionNode>();
 
-        private bool _extensionsAreLoaded;
+        // Flag indicating whether extension discovery has completed.
+        private bool _extensionDiscoveryComplete;
 
         // AssemblyTracker is a List of candidate ExtensionAssemblies, with built-in indexing
         // by file path and assembly name, eliminating the need to update indices separately.
@@ -151,7 +152,7 @@ namespace TestCentric.Extensibility
         {
             get
             {
-                FindAllExtensions();
+                CompleteExtensionDiscovery();
 
                 return _extensions.ToArray();
             }
@@ -211,7 +212,7 @@ namespace TestCentric.Extensibility
         /// </summary>
         public void EnableExtension(string typeName, bool enabled)
         {
-            FindAllExtensions();
+            CompleteExtensionDiscovery();
 
             foreach (var node in _extensions)
                 if (node.TypeName == typeName)
@@ -226,11 +227,11 @@ namespace TestCentric.Extensibility
         /// using other ExtensionManager properties or methods, it will be called
         /// but calls not going through ExtensionManager may fail.
         /// </summary>
-        public void FindAllExtensions()
+        public void CompleteExtensionDiscovery()
         {
-            if (!_extensionsAreLoaded)
+            if (!_extensionDiscoveryComplete)
             {
-                _extensionsAreLoaded = true;
+                _extensionDiscoveryComplete = true;
 
                 foreach (var candidate in _assemblyTracker)
                     FindExtensionsInAssembly(candidate);
@@ -246,7 +247,7 @@ namespace TestCentric.Extensibility
         /// </summary>
         public IEnumerable<ExtensionNode> GetExtensionNodes(string path)
         {
-            FindAllExtensions();
+            CompleteExtensionDiscovery();
 
             var ep = GetExtensionPoint(path);
             if (ep is not null)
@@ -260,7 +261,7 @@ namespace TestCentric.Extensibility
         /// <param name="path">The identifying path for an ExtensionPoint</param>
         public ExtensionNode? GetExtensionNode(string path)
         {
-            FindAllExtensions();
+            CompleteExtensionDiscovery();
 
             var ep = GetExtensionPoint(path);
 
@@ -273,7 +274,7 @@ namespace TestCentric.Extensibility
         /// <param name="includeDisabled">If true, disabled nodes are included</param>
         public IEnumerable<ExtensionNode> GetExtensionNodes<T>(bool includeDisabled = false)
         {
-            FindAllExtensions();
+            CompleteExtensionDiscovery();
 
             var ep = GetExtensionPoint(typeof(T));
             if (ep is not null)
