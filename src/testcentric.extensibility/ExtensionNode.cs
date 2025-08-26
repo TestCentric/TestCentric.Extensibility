@@ -35,7 +35,7 @@ namespace TestCentric.Extensibility
             AssemblyPath = assemblyPath;
             AssemblyVersion = assemblyVersion;
             TypeName = typeName;
-            Status = ExtensionStatus.Error; // Unloaded;
+            Status = ExtensionStatus.Unloaded;
             Enabled = true; // By default
         }
 
