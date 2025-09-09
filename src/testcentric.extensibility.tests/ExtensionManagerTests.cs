@@ -100,7 +100,7 @@ namespace TestCentric.Extensibility
             {
                 var path = ExpectedExtensionPointPaths[i];
                 var ep = ExtensionManager.GetExtensionPoint(path);
-                Assert.NotNull(ep, $"Unable to get ExtensionPoint for {path}");
+                Assert.That(ep, Is.Not.Null, $"Unable to get ExtensionPoint for {path}");
                 Assert.That(ep.Path, Is.EqualTo(path));
                 Assert.That(ep.TypeName, Is.EqualTo(ExpectedExtensionPointTypes[i].FullName));
             }
@@ -113,7 +113,7 @@ namespace TestCentric.Extensibility
             {
                 var type = ExpectedExtensionPointTypes[i];
                 var ep = ExtensionManager.GetExtensionPoint(type);
-                Assert.NotNull(ep, $"Unable to get ExtensionPoint for {type.FullName}");
+                Assert.That(ep, Is.Not.Null, $"Unable to get ExtensionPoint for {type.FullName}");
                 Assert.That(ep.Path, Is.EqualTo(ExpectedExtensionPointPaths[i]));
                 Assert.That(ep.TypeName, Is.EqualTo(type.FullName));
             }

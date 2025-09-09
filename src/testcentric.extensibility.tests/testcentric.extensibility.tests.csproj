@@ -29,10 +29,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="NUnit" Version="3.12.0" />
-		<PackageReference Include="NUnitLite" Version="3.12.0" />
-		<PackageReference Include="TestCentric.Engine.Api" Version="2.0.0-dev00009" />
-		<PackageReference Include="NUnit.Engine.Api" Version="3.16.2" />
+		<PackageReference Include="NUnit" Version="$(NUnitVersion)" />
+		<PackageReference Include="NUnitLite" Version="$(NUnitVersion)" />
+		<PackageReference Include="TestCentric.Engine.Api" Version="$(EngineVersion)" />
+		<PackageReference Include="NUnit.Engine.Api" Version="$(NUnitApiVersion)" />
 	</ItemGroup>
 
 	<Target Name="CopyAddinsFile" AfterTargets="Build">
