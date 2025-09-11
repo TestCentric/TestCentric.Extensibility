@@ -113,8 +113,11 @@ namespace TestCentric.Engine.Extensibility
 
 namespace NUnit.Engine.Extensibility
 {
-    //[Extension(Path = "/NUnit/Engine/TypeExtensions/IProjectLoader/")]
-    [Extension]
+#if NET20
+    [NUnit.Engine.Extensibility.Extension]
+#else
+    [NUnit.Extensibility.Extension]
+#endif
     public class FakeProjectLoader : IProjectLoader
     {
         public bool CanLoadFrom(string path)

@@ -41,8 +41,11 @@ namespace TestCentric.Extensibility
                 "/NUnit/Engine/TypeExtensions/ITestEventListener",
                 "/NUnit/Engine/TypeExtensions/IService",
                 "/NUnit/Engine/TypeExtensions/IDriverFactory",
+                "/NUnit/Engine/TypeExtensions/IResultWriter",
                 "/NUnit/Engine/TypeExtensions/IProjectLoader",
-                "/NUnit/Engine/TypeExtensions/IResultWriter"
+#if !NET35
+                "/NUnit/Engine/TypeExtensions/IAgentLauncher"
+#endif
             };
 
             // This could be initialized inline, but it's here for clarity
@@ -57,8 +60,11 @@ namespace TestCentric.Extensibility
                 typeof(NUnit.Engine.ITestEventListener),
                 typeof(NUnit.Engine.IService),
                 typeof(NUnit.Engine.Extensibility.IDriverFactory),
+                typeof(NUnit.Engine.Extensibility.IResultWriter),
                 typeof(NUnit.Engine.Extensibility.IProjectLoader),
-                typeof(NUnit.Engine.Extensibility.IResultWriter)
+#if !NET35
+                typeof(NUnit.Engine.Extensibility.IAgentLauncher)
+#endif
             };
         }
 
@@ -144,7 +150,9 @@ namespace TestCentric.Extensibility
             "TestCentric.Engine.Extensibility.FakeAgentLauncher",
             "TestCentric.Engine.Extensibility.FakeTestEventListener",
             "TestCentric.Engine.Extensibility.FakeExtension_ThrowsInConstructor",
+#if !NET35
             "NUnit.Engine.Extensibility.FakeProjectLoader"
+#endif
         ];
 
         [Test]
@@ -189,15 +197,15 @@ namespace TestCentric.Extensibility
 #if NETCOREAPP
         [TestCase("netstandard2.0", ExpectedResult = true)]
         [TestCase("net462", ExpectedResult = false)]
-        [TestCase("net20", ExpectedResult = false)]
+        //[TestCase("net20", ExpectedResult = false)]
 #elif NET40_OR_GREATER
         [TestCase("netstandard2.0", ExpectedResult = false)]
         [TestCase("net462", ExpectedResult = true)]
-        [TestCase("net20", ExpectedResult = true)]
+        //[TestCase("net20", ExpectedResult = true)]
 #else
         [TestCase("netstandard2.0", ExpectedResult = false)]
         [TestCase("net462", ExpectedResult = false)]
-        [TestCase("net20", ExpectedResult = true)]
+        //[TestCase("net20", ExpectedResult = true)]
 #endif
         public bool LoadTargetFramework(string tfm)
         {

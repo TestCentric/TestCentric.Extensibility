@@ -9,7 +9,11 @@ using System.IO;
 using System.Reflection;
 using TestCentric.Metadata;
 
+#if NET20
 using NUNIT = NUnit.Engine.Extensibility;
+#else
+using NUNIT = NUnit.Extensibility;
+#endif
 
 namespace TestCentric.Extensibility
 {
@@ -34,9 +38,9 @@ namespace TestCentric.Extensibility
         private const string TESTCENTRIC_EXTENSION_ATTRIBUTE = "TestCentric.Extensibility.ExtensionAttribute";
         private const string TESTCENTRIC_EXTENSION_PROPERTY_ATTRIBUTE = "TestCentric.Extensibility.ExtensionPropertyAttribute";
 
-        // TODO: These are NUnit V3 attributes. We should support as well
-        private const string NUNIT_EXTENSION_ATTRIBUTE = "NUnit.Engine.Extensibility.ExtensionAttribute";
-        private const string NUNIT_EXTENSION_PROPERTY_ATTRIBUTE = "NUnit.Engine.Extensibility.ExtensionPropertyAttribute";
+        // TODO: These are NUnit V4 attributes.
+        private const string NUNIT_EXTENSION_ATTRIBUTE = "NUnit.Extensibility.ExtensionAttribute";
+        private const string NUNIT_EXTENSION_PROPERTY_ATTRIBUTE = "NUnit.Extensibility.ExtensionPropertyAttribute";
 
         // List of all ExtensionPoints discovered
         private readonly List<ExtensionPoint> _extensionPoints = new List<ExtensionPoint>();
