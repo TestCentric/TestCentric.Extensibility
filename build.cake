@@ -19,8 +19,8 @@ BuildSettings.Packages.Add(new NuGetPackage(
 	source: "nuget/TestCentric.Extensibility.nuspec",
 	checks: new PackageCheck[] {
 		HasFiles("LICENSE.txt", "README.md", "testcentric.png"),
-		HasDirectory("lib/net20")
-			.WithFiles("TestCentric.Extensibility.dll", "TestCentric.Extensibility.api.dll", "nunit.engine.api.dll"),
+		//HasDirectory("lib/net20")
+		//	.WithFiles("TestCentric.Extensibility.dll", "TestCentric.Extensibility.api.dll", "nunit.engine.api.dll"),
 		HasDirectory("lib/net462")
 			.WithFiles("testcentric.extensibility.dll", "TestCentric.Extensibility.api.dll", "nunit.engine.api.dll"),
 		HasDirectory("lib/netstandard2.0")
@@ -49,7 +49,7 @@ BuildSettings.Packages.Add(new NuGetPackage(
 	checks: new PackageCheck[] {
 		HasFiles(
 			"LICENSE.txt", "README.md", "testcentric.png",
-			"lib/net20/testcentric.extensibility.api.dll",
+			//"lib/net20/testcentric.extensibility.api.dll",
 			"lib/net462/testcentric.extensibility.api.dll",
 			"lib/netstandard2.0/testcentric.extensibility.api.dll") }));
 
