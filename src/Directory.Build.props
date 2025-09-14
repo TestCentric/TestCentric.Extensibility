@@ -23,7 +23,7 @@
         <DebugSymbols>true</DebugSymbols>
         <!-- Commonly Used Package Versions -->
         <AnnotatedReferenceAssemblyVersion>8.0.0</AnnotatedReferenceAssemblyVersion>
-		<EngineVersion>2.0.0-dev01659</EngineVersion>
+		<EngineVersion>2.0.0-dev01905</EngineVersion>
 		<MetadataVersion>3.0.4</MetadataVersion>
 		<InternalTraceVersion>1.2.1</InternalTraceVersion>
 		<!-- Informational Settings -->
