@@ -12,104 +12,104 @@ using System.Reflection;
 using System.Xml;
 using System.IO;
 
-namespace TestCentric.Engine.Extensibility
-{
-    // Extensions
+//namespace TestCentric.Engine.Extensibility
+//{
+//    // Extensions
 
-    [Extension(Enabled = false)]
-    public class FakeTestEventListener : ITestEventListener
-    {
-        public void OnTestEvent(string text)
-        {
-            throw new System.NotImplementedException();
-        }
-    }
+//    //[Extension(Enabled = false)]
+//    public class FakeTestEventListener : ITestEventListener
+//    {
+//        public void OnTestEvent(string text)
+//        {
+//            throw new System.NotImplementedException();
+//        }
+//    }
 
-    //[Extension]
-    public class FakeService : IService
-    {
-        public IServiceLocator ServiceContext { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
+//    //[Extension]
+//    public class FakeService : IService
+//    {
+//        public IServiceLocator ServiceContext { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
 
-        public ServiceStatus Status => throw new System.NotImplementedException();
+//        public ServiceStatus Status => throw new System.NotImplementedException();
 
-        public void StartService()
-        {
-            throw new System.NotImplementedException();
-        }
+//        public void StartService()
+//        {
+//            throw new System.NotImplementedException();
+//        }
 
-        public void StopService()
-        {
-            throw new System.NotImplementedException();
-        }
-    }
+//        public void StopService()
+//        {
+//            throw new System.NotImplementedException();
+//        }
+//    }
 
-    [Extension]
-    public class FakeAgentLauncher : TestCentric.Engine.Extensibility.IAgentLauncher
-    {
-        public TestAgentInfo AgentInfo => throw new NotImplementedException();
+//    //[Extension]
+//    public class FakeAgentLauncher : TestCentric.Engine.Extensibility.IAgentLauncher
+//    {
+//        public TestAgentInfo AgentInfo => throw new NotImplementedException();
 
-        public bool CanCreateProcess(TestPackage package)
-        {
-            throw new NotImplementedException();
-        }
+//        public bool CanCreateProcess(TestPackage package)
+//        {
+//            throw new NotImplementedException();
+//        }
 
-        public Process CreateProcess(Guid agentId, string agencyUrl, TestPackage package)
-        {
-            throw new NotImplementedException();
-        }
-    }
+//        public Process CreateProcess(Guid agentId, string agencyUrl, TestPackage package)
+//        {
+//            throw new NotImplementedException();
+//        }
+//    }
 
-    //[Extension]
-    public class FakeDriverFactory : IDriverFactory
-    {
-#if NETFRAMEWORK
-        public IFrameworkDriver GetDriver(AppDomain domain, AssemblyName reference)
-#else
-        public IFrameworkDriver GetDriver(AssemblyName reference)
-#endif
-        {
-            throw new NotImplementedException();
-        }
+//    //[Extension]
+//    public class FakeDriverFactory : IDriverFactory
+//    {
+//#if NETFRAMEWORK
+//        public IFrameworkDriver GetDriver(AppDomain domain, AssemblyName reference)
+//#else
+//        public IFrameworkDriver GetDriver(AssemblyName reference)
+//#endif
+//        {
+//            throw new NotImplementedException();
+//        }
 
-        public bool IsSupportedTestFramework(AssemblyName reference)
-        {
-            throw new NotImplementedException();
-        }
-    }
+//        public bool IsSupportedTestFramework(AssemblyName reference)
+//        {
+//            throw new NotImplementedException();
+//        }
+//    }
 
-    //[Extension]
-    public class FakeResultWriter : IResultWriter
-    {
-        public void CheckWritability(string outputPath)
-        {
-            throw new NotImplementedException();
-        }
+//    //[Extension]
+//    public class FakeResultWriter : IResultWriter
+//    {
+//        public void CheckWritability(string outputPath)
+//        {
+//            throw new NotImplementedException();
+//        }
 
-        public void WriteResultFile(XmlNode resultNode, string outputPath)
-        {
-            throw new NotImplementedException();
-        }
+//        public void WriteResultFile(XmlNode resultNode, string outputPath)
+//        {
+//            throw new NotImplementedException();
+//        }
 
-        public void WriteResultFile(XmlNode resultNode, TextWriter writer)
-        {
-            throw new NotImplementedException();
-        }
-    }
+//        public void WriteResultFile(XmlNode resultNode, TextWriter writer)
+//        {
+//            throw new NotImplementedException();
+//        }
+//    }
 
-    [Extension(Enabled = false)]
-    public class FakeExtension_ThrowsInConstructor : ITestEventListener
-    {
-        public FakeExtension_ThrowsInConstructor()
-        {
-            throw new NotImplementedException();
-        }
+//    //[Extension(Enabled = false)]
+//    public class FakeExtension_ThrowsInConstructor : ITestEventListener
+//    {
+//        public FakeExtension_ThrowsInConstructor()
+//        {
+//            throw new NotImplementedException();
+//        }
 
-        public void OnTestEvent(string text)
-        {
-            throw new System.NotImplementedException();
-        }
-    }
-}
+//        public void OnTestEvent(string text)
+//        {
+//            throw new System.NotImplementedException();
+//        }
+//    }
+//}
 
 namespace NUnit.Engine.Extensibility
 {

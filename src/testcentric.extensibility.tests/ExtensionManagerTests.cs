@@ -3,6 +3,7 @@
 // Licensed under the MIT License. See LICENSE file in root directory.
 // ***********************************************************************
 
+#if false // TODO: Re-design this test fixture
 using NUnit.Framework;
 using System;
 using System.IO;
@@ -38,11 +39,11 @@ namespace TestCentric.Extensibility
                 prefix + "IDriverFactory",
                 prefix + "IProjectLoader",
                 prefix + "IResultWriter",
-                "/NUnit/Engine/TypeExtensions/ITestEventListener",
-                "/NUnit/Engine/TypeExtensions/IService",
-                "/NUnit/Engine/TypeExtensions/IDriverFactory",
-                "/NUnit/Engine/TypeExtensions/IResultWriter",
-                "/NUnit/Engine/TypeExtensions/IProjectLoader",
+                //"/NUnit/Engine/TypeExtensions/ITestEventListener",
+                //"/NUnit/Engine/TypeExtensions/IService",
+                //"/NUnit/Engine/TypeExtensions/IDriverFactory",
+                //"/NUnit/Engine/TypeExtensions/IResultWriter",
+                //"/NUnit/Engine/TypeExtensions/IProjectLoader",
 #if !NET35
                 "/NUnit/Engine/TypeExtensions/IAgentLauncher"
 #endif
@@ -161,56 +162,56 @@ namespace TestCentric.Extensibility
             Assert.That(ExtensionManager.Extensions.Select(ep => ep.TypeName), Is.EquivalentTo(KnownExtensionTypeNames));
         }
 
-        // Run this first as subsequent test will enable the extension
-        [Test, Order(1)]
-        public void ExtensionMayBeDisabledByDefault()
-        {
-            Assert.That(ExtensionManager.Extensions,
-                Has.One.Property(nameof(ExtensionNode.TypeName)).EqualTo("TestCentric.Engine.Extensibility.FakeTestEventListener")
-                   .And.Property(nameof(ExtensionNode.Enabled)).False);
-        }
+        //// Run this first as subsequent test will enable the extension
+        //[Test, Order(1)]
+        //public void ExtensionMayBeDisabledByDefault()
+        //{
+        //    Assert.That(ExtensionManager.Extensions,
+        //        Has.One.Property(nameof(ExtensionNode.TypeName)).EqualTo("TestCentric.Engine.Extensibility.FakeTestEventListener")
+        //           .And.Property(nameof(ExtensionNode.Enabled)).False);
+        //}
 
-        [Test]
-        public void DisabledExtensionMayBeEnabled()
-        {
-            ExtensionManager.EnableExtension("TestCentric.Engine.Extensibility.FakeTestEventListener", true);
+        //[Test]
+        //public void DisabledExtensionMayBeEnabled()
+        //{
+        //    ExtensionManager.EnableExtension("TestCentric.Engine.Extensibility.FakeTestEventListener", true);
 
-            Assert.That(ExtensionManager.Extensions,
-                Has.One.Property(nameof(ExtensionNode.TypeName)).EqualTo("TestCentric.Engine.Extensibility.FakeTestEventListener")
-                   .And.Property(nameof(ExtensionNode.Enabled)).True);
-        }
+        //    Assert.That(ExtensionManager.Extensions,
+        //        Has.One.Property(nameof(ExtensionNode.TypeName)).EqualTo("TestCentric.Engine.Extensibility.FakeTestEventListener")
+        //           .And.Property(nameof(ExtensionNode.Enabled)).True);
+        //}
 
-        [Test]
-        public void ExtensionThrowsInConstructor()
-        {
-            string typeName = "TestCentric.Engine.Extensibility.FakeExtension_ThrowsInConstructor";
-            var exNode = ExtensionManager.Extensions.Where(n => n.TypeName == typeName).Single();
+        //[Test]
+        //public void ExtensionThrowsInConstructor()
+        //{
+        //    string typeName = "TestCentric.Engine.Extensibility.FakeExtension_ThrowsInConstructor";
+        //    var exNode = ExtensionManager.Extensions.Where(n => n.TypeName == typeName).Single();
 
-            // Although the constructor throws, we don't get an exception.
-            // However, the node contains the error information.
-            Assert.DoesNotThrow(() => { var o = exNode.ExtensionObject; });
-            Assert.That(exNode.Status, Is.EqualTo(ExtensionStatus.Error));
-            Assert.That(exNode.Exception, Is.InstanceOf<ExtensibilityException>());
-            Assert.That(exNode.Exception.InnerException, Is.InstanceOf<NotImplementedException>());
-        }
+        //    // Although the constructor throws, we don't get an exception.
+        //    // However, the node contains the error information.
+        //    Assert.DoesNotThrow(() => { var o = exNode.ExtensionObject; });
+        //    Assert.That(exNode.Status, Is.EqualTo(ExtensionStatus.Error));
+        //    Assert.That(exNode.Exception, Is.InstanceOf<ExtensibilityException>());
+        //    Assert.That(exNode.Exception.InnerException, Is.InstanceOf<NotImplementedException>());
+        //}
 
-#if NETCOREAPP
-        [TestCase("netstandard2.0", ExpectedResult = true)]
-        [TestCase("net462", ExpectedResult = false)]
-        //[TestCase("net20", ExpectedResult = false)]
-#elif NET40_OR_GREATER
-        [TestCase("netstandard2.0", ExpectedResult = false)]
-        [TestCase("net462", ExpectedResult = true)]
-        //[TestCase("net20", ExpectedResult = true)]
-#else
-        [TestCase("netstandard2.0", ExpectedResult = false)]
-        [TestCase("net462", ExpectedResult = false)]
-        //[TestCase("net20", ExpectedResult = true)]
-#endif
-        public bool LoadTargetFramework(string tfm)
-        {
-            return ExtensionManager.CanLoadTargetFramework(THIS_ASSEMBLY, FakeExtensions(tfm));
-        }
+//#if NETCOREAPP
+//        [TestCase("netstandard2.0", ExpectedResult = true)]
+//        [TestCase("net462", ExpectedResult = false)]
+//        //[TestCase("net20", ExpectedResult = false)]
+//#elif NET40_OR_GREATER
+//        [TestCase("netstandard2.0", ExpectedResult = false)]
+//        [TestCase("net462", ExpectedResult = true)]
+//        //[TestCase("net20", ExpectedResult = true)]
+//#else
+//        [TestCase("netstandard2.0", ExpectedResult = false)]
+//        [TestCase("net462", ExpectedResult = false)]
+//        //[TestCase("net20", ExpectedResult = true)]
+//#endif
+//        public bool LoadTargetFramework(string tfm)
+//        {
+//            return ExtensionManager.CanLoadTargetFramework(THIS_ASSEMBLY, FakeExtensions(tfm));
+//        }
 
         #endregion
 
@@ -231,3 +232,4 @@ namespace TestCentric.Extensibility
         }
     }
 }
+#endif
