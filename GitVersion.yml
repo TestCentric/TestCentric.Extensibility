@@ -1,8 +1,7 @@
 next-version: 3.3.0
 mode: ContinuousDelivery
 branches:
-  master:
-    regex: ^main$
+  main:
     label: dev
   release:
     label: pre

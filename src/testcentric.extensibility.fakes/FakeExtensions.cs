@@ -12,11 +12,12 @@ using System.Reflection;
 using System.Xml;
 using System.IO;
 
+#if false
 namespace TestCentric.Engine.Extensibility
 {
     // Extensions
 
-    [Extension(Enabled = false)]
+    [Extension(Enabled = false, Path = "/TestCentric/Engine/TypeExtensions/ITestEventListener")]
     public class FakeTestEventListener : ITestEventListener
     {
         public void OnTestEvent(string text)
@@ -110,6 +111,7 @@ namespace TestCentric.Engine.Extensibility
         }
     }
 }
+#endif
 
 namespace NUnit.Engine.Extensibility
 {

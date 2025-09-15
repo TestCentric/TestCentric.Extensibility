@@ -1,0 +1,61 @@
+commit b1e0d4a84616bcb89fb7f718d324b2357162635e (HEAD -> main)
+Author: Charlie Poole <charliepoole@gmail.com>
+Date:   Thu Sep 11 14:51:46 2025 -0700
+
+    Support NUnit Extensions
+
+commit 3ee1afbf40a26454cbd26b2bbf1ffe2c3f083ff2
+Merge: d9250a1 0225bc7
+Author: CharliePoole <charliepoole@gmail.com>
+Date:   Tue Sep 9 20:21:01 2025 -0700
+
+    Merge pull request #63 from TestCentric/updt-dpndncz
+
+    Update all dependencies
+
+commit 0225bc707034b3b988e8293107ba4f9824aa98d1
+Author: Charlie Poole <charliepoole@gmail.com>
+Date:   Tue Sep 9 15:40:30 2025 -0700
+
+    Update all dependencies
+
+commit d9250a18c7606bd786eb634da2a1f8925d8a4f1a
+Author: Charlie Poole <charliepoole@gmail.com>
+Date:   Tue Aug 26 11:13:55 2025 -0700
+
+    Initialize extensions to Unloaded status
+
+commit 8b31a39b1c9f8fd2e68abc1c44065406592431d5
+Merge: 5960c23 9ac1ff4
+Author: CharliePoole <charliepoole@gmail.com>
+Date:   Tue Aug 12 17:08:09 2025 -0700
+
+    Merge pull request #61 from TestCentric/issue-55b
+
+    Further API changes
+
+commit 9ac1ff46fa2f5c5028dc504e3ff33c07c04d1462
+Author: Charlie Poole <charliepoole@gmail.com>
+Date:   Tue Aug 12 16:06:49 2025 -0700
+
+    Further API changes
+
+commit 5960c23cb7935ae425f3326fa539f2c9d2970fd2
+Merge: 1d08661 97ddf15
+Author: CharliePoole <charliepoole@gmail.com>
+Date:   Fri Aug 8 10:51:30 2025 -0700
+
+    Merge pull request #60 from TestCentric/issue-59
+
+    Simplification of ExtensionManager API
+
+commit 97ddf150f85c5ba38cc98ea1e16e199206f54d08
+Author: Charlie Poole <charliepoole@gmail.com>
+Date:   Fri Aug 8 08:51:07 2025 -0700
+
+    Simplification of ExtensionManager API
+
+commit 1d086619700d3298a87b647ca74d3481154140e4 (tag: 3.2.0)
+Merge: 6dc2210 cf07229
+Author: CharliePoole <charliepoole@gmail.com>
+:
