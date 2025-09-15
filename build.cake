@@ -1,12 +1,12 @@
 // Load the recipe
-#load nuget:?package=TestCentric.Cake.Recipe&version=1.3.3
+#load nuget:?package=TestCentric.Cake.Recipe&version=1.4.1-dev00004
 // Comment out above line and uncomment below for local tests of recipe changes
 //#load ../TestCentric.Cake.Recipe/recipe/*.cake
 
 //////////////////////////////////////////////////////////////////////
 // INITIALIZE BUILD SETTINGS
 //////////////////////////////////////////////////////////////////////
-
+#break
 BuildSettings.Initialize(
 	context: Context,
 	title: "TestCentric Extensibility",

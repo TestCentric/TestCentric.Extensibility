@@ -35,6 +35,7 @@ namespace TestCentric.Extensibility
             AssemblyPath = assemblyPath;
             AssemblyVersion = assemblyVersion;
             TypeName = typeName;
+            Status = ExtensionStatus.Unloaded;
             Enabled = true; // By default
         }
 
@@ -60,6 +61,16 @@ namespace TestCentric.Extensibility
         /// </summary>
         /// <value><c>true</c> if enabled; otherwise, <c>false</c>.</value>
         public bool Enabled { get; set; }
+
+        /// <summary>
+        /// Status of this extension
+        /// </summary>
+        public ExtensionStatus Status { get; private set; }
+
+        /// <summary>
+        /// Exception thrown in creating the ExtensionObject, if Status is error, otherwise null.
+        /// </summary>
+        public Exception? Exception { get; private set; }
 
         /// <summary>
         /// Gets and sets the unique string identifying the ExtensionPoint for which
@@ -101,16 +112,29 @@ namespace TestCentric.Extensibility
 
         /// <summary>
         /// Gets an object of the specified extension type, loading the Assembly
-        /// and creating the object as needed. Note that this property always
-        /// returns the same object. Use CreateExtensionObject if a new one is
-        /// needed each time or to specify arguments.
+        /// and creating the object as needed. A null return indicates an error,
+        /// which is recorded in the ExtensionNode.
         /// </summary>
-        public object ExtensionObject
+        public object? ExtensionObject
         {
             get
             {
                 if (_extensionObject is null)
-                    _extensionObject = CreateExtensionObject();
+                    try
+                    {
+                        _extensionObject = CreateExtensionObject();
+                        Status = ExtensionStatus.Loaded;
+                    }
+                    catch (Exception ex)
+                    {
+                        if (ex is TargetInvocationException)
+                            ex = ex.InnerException;
+
+                        Status = ExtensionStatus.Error;
+                        Enabled = false;
+                        Exception = new ExtensibilityException(
+                            $"Error constructing '{TypeName}'.", ex);
+                    }
 
                 return _extensionObject;
             }
@@ -119,25 +143,16 @@ namespace TestCentric.Extensibility
         /// <summary>
         /// Gets a newly created extension object, created in the current application domain
         /// </summary>
-        public object CreateExtensionObject(params object[] args)
+        private object CreateExtensionObject(params object[] args)
         {
-            try
-            {
 #if NETFRAMEWORK
             return AppDomain.CurrentDomain.CreateInstanceFromAndUnwrap(
                 AssemblyPath, TypeName, false, 0, null, args, null, null, null);
 #else
-                var assembly = Assembly.LoadFrom(AssemblyPath);
-                var type = assembly.GetType(TypeName, throwOnError: true)!;
-                return Activator.CreateInstance(type, args)!;
+            var assembly = Assembly.LoadFrom(AssemblyPath);
+            var type = assembly.GetType(TypeName, throwOnError: true)!;
+            return Activator.CreateInstance(type, args)!;
 #endif
-            }
-            catch (Exception ex)
-            {
-                if (ex is TargetInvocationException)
-                    ex = ex.InnerException;
-                throw new ExtensibilityException("Error in constructing extension object", ex);
-            }
         }
 
 #endregion

@@ -22,7 +22,7 @@ namespace TestCentric.Extensibility
     /// engine's ExtensionService to decide how much to make available publicly. This
     /// approach gives the most flexibility in using ExtensionManager for various purposes.
     /// </remarks>
-    public class ExtensionManager : IExtensionManager
+    public class ExtensionManager
     {
         private static readonly Logger log = InternalTrace.GetLogger(typeof(ExtensionManager));
 
@@ -47,26 +47,27 @@ namespace TestCentric.Extensibility
         // List of ExtensionNodes for all extensions discovered.
         private readonly List<ExtensionNode> _extensions = new List<ExtensionNode>();
 
-        private bool _extensionsAreLoaded;
+        // Flag indicating whether extension discovery has completed.
+        private bool _extensionDiscoveryComplete;
 
         // AssemblyTracker is a List of candidate ExtensionAssemblies, with built-in indexing
         // by file path and assembly name, eliminating the need to update indices separately.
-        private readonly ExtensionAssemblyTracker _assemblies = new ExtensionAssemblyTracker();
+        private readonly ExtensionAssemblyTracker _assemblyTracker = new ExtensionAssemblyTracker();
 
         // List of all extensionDirectories specified on command-line or in environment,
         // used to ignore duplicate calls to FindExtensionAssemblies.
         private readonly List<string> _extensionDirectories = new List<string>();
-
-        // Default values for PackagePrefixes and TypeExtensionPath, which may be set
-        // by the caller when ExtensionManager is constructed.
-        public string[] PackagePrefixes { get; set; } = ["NUnit.Extension.", "TestCentric.Extension"];
-        public string TypeExtensionPath { get; set; } = DEFAULT_TYPE_EXTENSION_PATH;
 
         #region Construction
 
         public ExtensionManager()
         {
         }
+
+        // Default values for PackagePrefixes and TypeExtensionPath, which may be set
+        // by the caller when ExtensionManager is constructed.
+        public string[] PackagePrefixes { get; set; } = ["NUnit.Extension.", "TestCentric.Extension"];
+        public string TypeExtensionPath { get; set; } = DEFAULT_TYPE_EXTENSION_PATH;
 
         #endregion
 
@@ -75,7 +76,7 @@ namespace TestCentric.Extensibility
         /// <summary>
         /// Gets an enumeration of all ExtensionPoints in the engine.
         /// </summary>
-        public IEnumerable<IExtensionPoint> ExtensionPoints
+        public IEnumerable<ExtensionPoint> ExtensionPoints
         {
             get { return _extensionPoints.ToArray(); }
         }
@@ -133,19 +134,11 @@ namespace TestCentric.Extensibility
         }
 
         /// <summary>
-        /// Get an IExtensionPoint based on its unique identifying path.
-        /// </summary>
-        IExtensionPoint? IExtensionManager.GetExtensionPoint(string path)
-        {
-            return this.GetExtensionPoint(path);
-        }
-
-        /// <summary>
         /// Get an ExtensionPoint based on its unique identifying path.
         /// </summary>
         public ExtensionPoint? GetExtensionPoint(string path)
         {
-            return _extensionPointIndex.ContainsKey(path) ? _extensionPointIndex[path] : null;
+            return _extensionPointIndex.TryGetValue(path, out ExtensionPoint? ep) ? ep : null;
         }
 
         #endregion
@@ -155,11 +148,11 @@ namespace TestCentric.Extensibility
         /// <summary>
         /// Gets an enumeration of all installed Extensions.
         /// </summary>
-        public IEnumerable<IExtensionNode> Extensions
+        public IEnumerable<ExtensionNode> Extensions
         {
             get
             {
-                LoadExtensions();
+                CompleteExtensionDiscovery();
 
                 return _extensions.ToArray();
             }
@@ -215,20 +208,11 @@ namespace TestCentric.Extensibility
         }
 
         /// <summary>
-        /// Get extension objects for all nodes of a given type
-        /// </summary>
-        public IEnumerable<T> GetExtensions<T>()
-        {
-            foreach (var node in GetExtensionNodes<T>())
-                yield return (T)((ExtensionNode)node).ExtensionObject;
-        }
-
-        /// <summary>
         /// Enable or disable an extension
         /// </summary>
         public void EnableExtension(string typeName, bool enabled)
         {
-            LoadExtensions();
+            CompleteExtensionDiscovery();
 
             foreach (var node in _extensions)
                 if (node.TypeName == typeName)
@@ -236,19 +220,20 @@ namespace TestCentric.Extensibility
         }
 
         /// <summary>
-        /// We can only load extensions after all candidate assemblies are identified.
-        /// This method may be called by the user after all "Find" calls are complete.
+        /// We can only find the best version of each extension after all candidate
+        /// assemblies are identified. This method may be called by the
+        /// user after all "Find" calls are complete.
         /// If the user fails to call it and subsequently tries to examine extensions
         /// using other ExtensionManager properties or methods, it will be called
         /// but calls not going through ExtensionManager may fail.
         /// </summary>
-        public void LoadExtensions()
+        public void CompleteExtensionDiscovery()
         {
-            if (!_extensionsAreLoaded)
+            if (!_extensionDiscoveryComplete)
             {
-                _extensionsAreLoaded = true;
+                _extensionDiscoveryComplete = true;
 
-                foreach (var candidate in _assemblies)
+                foreach (var candidate in _assemblyTracker)
                     FindExtensionsInAssembly(candidate);
             }
         }
@@ -260,9 +245,9 @@ namespace TestCentric.Extensibility
         /// <summary>
         /// Get all ExtensionNodes for a path
         /// </summary>
-        public IEnumerable<IExtensionNode> GetExtensionNodes(string path)
+        public IEnumerable<ExtensionNode> GetExtensionNodes(string path)
         {
-            LoadExtensions();
+            CompleteExtensionDiscovery();
 
             var ep = GetExtensionPoint(path);
             if (ep is not null)
@@ -274,9 +259,9 @@ namespace TestCentric.Extensibility
         /// Get the first or only ExtensionNode for a given ExtensionPoint
         /// </summary>
         /// <param name="path">The identifying path for an ExtensionPoint</param>
-        public IExtensionNode? GetExtensionNode(string path)
+        public ExtensionNode? GetExtensionNode(string path)
         {
-            LoadExtensions();
+            CompleteExtensionDiscovery();
 
             var ep = GetExtensionPoint(path);
 
@@ -287,9 +272,9 @@ namespace TestCentric.Extensibility
         /// Get all extension nodes of a given Type.
         /// </summary>
         /// <param name="includeDisabled">If true, disabled nodes are included</param>
-        public IEnumerable<IExtensionNode> GetExtensionNodes<T>(bool includeDisabled = false)
+        public IEnumerable<ExtensionNode> GetExtensionNodes<T>(bool includeDisabled = false)
         {
-            LoadExtensions();
+            CompleteExtensionDiscovery();
 
             var ep = GetExtensionPoint(typeof(T));
             if (ep is not null)
@@ -445,28 +430,7 @@ namespace TestCentric.Extensibility
                         return;
                     }
 
-                    _assemblies.AddOrUpdate(candidateAssembly);
-                    //// Check to see if this is a duplicate
-                    //for (int i = 0; i < _extensionAssemblies.Count; i++)
-                    //{
-                    //    var assembly = _extensionAssemblies[i];
-
-                    //    if (candidate.IsDuplicateOf(assembly))
-                    //    {
-                    //        if (candidate.IsBetterVersionOf(assembly))
-                    //        {
-                    //            _extensionAssemblies[i] = candidate;
-                    //            log.Info($"  Assembly: {Path.GetFileName(filePath)} ,fromWildCard = {fromWildCard}, duplicate replacing original");
-                    //        }
-                    //        else
-                    //            log.Info($"  Assembly: {Path.GetFileName(filePath)} ,fromWildCard = {fromWildCard}, duplicate ignored");
-
-                    //        return;
-                    //    }
-                    //}
-
-                    //log.Info($"  Assembly: {Path.GetFileName(filePath)} ,fromWildCard = {fromWildCard}, saved");
-                    //_extensionAssemblies.Add(candidate);
+                    _assemblyTracker.AddOrUpdate(candidateAssembly);
                 }
                 catch (BadImageFormatException e)
                 {

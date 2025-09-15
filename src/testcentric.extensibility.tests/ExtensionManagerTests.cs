@@ -80,7 +80,7 @@ namespace TestCentric.Extensibility
             Assert.That(ExtensionManager.ExtensionPoints.Count, Is.GreaterThan(0), "No ExtensionPoints were found");
 
             ExtensionManager.FindExtensionAssemblies(FAKE_EXTENSIONS_PARENT_DIRECTORY);
-            ExtensionManager.LoadExtensions();
+            ExtensionManager.CompleteExtensionDiscovery();
             Assert.That(ExtensionManager.Extensions.Count, Is.GreaterThan(0), "No Extensions were found");
         }
 
@@ -100,7 +100,7 @@ namespace TestCentric.Extensibility
             {
                 var path = ExpectedExtensionPointPaths[i];
                 var ep = ExtensionManager.GetExtensionPoint(path);
-                Assert.NotNull(ep, $"Unable to get ExtensionPoint for {path}");
+                Assert.That(ep, Is.Not.Null, $"Unable to get ExtensionPoint for {path}");
                 Assert.That(ep.Path, Is.EqualTo(path));
                 Assert.That(ep.TypeName, Is.EqualTo(ExpectedExtensionPointTypes[i].FullName));
             }
@@ -113,7 +113,7 @@ namespace TestCentric.Extensibility
             {
                 var type = ExpectedExtensionPointTypes[i];
                 var ep = ExtensionManager.GetExtensionPoint(type);
-                Assert.NotNull(ep, $"Unable to get ExtensionPoint for {type.FullName}");
+                Assert.That(ep, Is.Not.Null, $"Unable to get ExtensionPoint for {type.FullName}");
                 Assert.That(ep.Path, Is.EqualTo(ExpectedExtensionPointPaths[i]));
                 Assert.That(ep.TypeName, Is.EqualTo(type.FullName));
             }
@@ -176,12 +176,14 @@ namespace TestCentric.Extensibility
         public void ExtensionThrowsInConstructor()
         {
             string typeName = "TestCentric.Engine.Extensibility.FakeExtension_ThrowsInConstructor";
-            var iexNode = ExtensionManager.Extensions.Where(n => n.TypeName == typeName).Single();
-            var exNode = iexNode as ExtensionNode;
+            var exNode = ExtensionManager.Extensions.Where(n => n.TypeName == typeName).Single();
 
-            // Demonstrates that the exception is caused when ExtensionObject is accessed
-            var tiex = Assert.Throws<ExtensibilityException>(() => { var o = exNode.ExtensionObject; });
-            Assert.That(tiex.InnerException, Is.InstanceOf<NotImplementedException>());
+            // Although the constructor throws, we don't get an exception.
+            // However, the node contains the error information.
+            Assert.DoesNotThrow(() => { var o = exNode.ExtensionObject; });
+            Assert.That(exNode.Status, Is.EqualTo(ExtensionStatus.Error));
+            Assert.That(exNode.Exception, Is.InstanceOf<ExtensibilityException>());
+            Assert.That(exNode.Exception.InnerException, Is.InstanceOf<NotImplementedException>());
         }
 
 #if NETCOREAPP
