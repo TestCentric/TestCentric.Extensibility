@@ -212,7 +212,6 @@ namespace TestCentric.Extensibility
 //        {
 //            return ExtensionManager.CanLoadTargetFramework(THIS_ASSEMBLY, FakeExtensions(tfm));
 //        }
-
         #endregion
 
         private const string FAKE_EXTENSIONS_FILENAME = "TestCentric.Extensibility.FakeExtensions.dll";
