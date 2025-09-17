@@ -3,49 +3,18 @@
 // Licensed under the MIT License. See LICENSE file in root directory.
 // ***********************************************************************
 
-using TestCentric.Extensibility;
-using TestCentric.Engine.Services;
-
 using System.Diagnostics;
 using System;
 using System.Reflection;
 using System.Xml;
 using System.IO;
 
-#if false
 namespace TestCentric.Engine.Extensibility
 {
-    // Extensions
-
-    [Extension(Enabled = false, Path = "/TestCentric/Engine/TypeExtensions/ITestEventListener")]
-    public class FakeTestEventListener : ITestEventListener
-    {
-        public void OnTestEvent(string text)
-        {
-            throw new System.NotImplementedException();
-        }
-    }
-
-    //[Extension]
-    public class FakeService : IService
-    {
-        public IServiceLocator ServiceContext { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
-
-        public ServiceStatus Status => throw new System.NotImplementedException();
-
-        public void StartService()
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public void StopService()
-        {
-            throw new System.NotImplementedException();
-        }
-    }
+    using TestCentric.Extensibility;
 
     [Extension]
-    public class FakeAgentLauncher : TestCentric.Engine.Extensibility.IAgentLauncher
+    public class FakeAgentLauncher : IAgentLauncher
     {
         public TestAgentInfo AgentInfo => throw new NotImplementedException();
 
@@ -60,25 +29,78 @@ namespace TestCentric.Engine.Extensibility
         }
     }
 
-    //[Extension]
-    public class FakeDriverFactory : IDriverFactory
+    [Extension(Enabled = false)]
+    public class FakeAgentLauncher_ThrowsInConstructor : IAgentLauncher
     {
-#if NETFRAMEWORK
-        public IFrameworkDriver GetDriver(AppDomain domain, AssemblyName reference)
-#else
-        public IFrameworkDriver GetDriver(AssemblyName reference)
-#endif
+        public FakeAgentLauncher_ThrowsInConstructor()
         {
             throw new NotImplementedException();
         }
 
-        public bool IsSupportedTestFramework(AssemblyName reference)
+        public TestAgentInfo AgentInfo => throw new NotImplementedException();
+
+        public bool CanCreateProcess(TestPackage package)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Process CreateProcess(Guid agentId, string agencyUrl, TestPackage package)
         {
             throw new NotImplementedException();
         }
     }
+}
 
-    //[Extension]
+namespace NUnit.Engine.Extensibility
+{
+#if NET20
+    using NUnit.Engine.Extensibility;
+#else
+    using NUnit.Extensibility;
+#endif
+
+    [Extension(Enabled = false, Path = "/NUnit/Engine/TypeExtensions/ITestEventListener")]
+    public class FakeTestEventListener : ITestEventListener
+    {
+        public void OnTestEvent(string text)
+        {
+            throw new System.NotImplementedException();
+        }
+    }
+
+    [Extension(Path = "/NUnit/Engine/TypeExtensions/IProjectLoader")]
+    public class FakeProjectLoader : IProjectLoader
+    {
+        public bool CanLoadFrom(string path)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public NUnit.Engine.Extensibility.IProject LoadFrom(string path)
+        {
+            throw new System.NotImplementedException();
+        }
+    }
+
+//    [Extension]
+//    public class FakeDriverFactory : IDriverFactory
+//    {
+//#if NETFRAMEWORK
+//        public IFrameworkDriver GetDriver(AppDomain domain, AssemblyName reference)
+//#else
+//        public IFrameworkDriver GetDriver(AssemblyName reference)
+//#endif
+//        {
+//            throw new NotImplementedException();
+//        }
+
+//        public bool IsSupportedTestFramework(AssemblyName reference)
+//        {
+//            throw new NotImplementedException();
+//        }
+//    }
+
+    [Extension]
     public class FakeResultWriter : IResultWriter
     {
         public void CheckWritability(string outputPath)
@@ -97,34 +119,15 @@ namespace TestCentric.Engine.Extensibility
         }
     }
 
-    [Extension(Enabled = false)]
-    public class FakeExtension_ThrowsInConstructor : ITestEventListener
+    [Extension(Enabled = false, Path = "/NUnit/Engine/TypeExtensions/ITestEventListener")]
+    public class FakeNUnitExtension_ThrowsInConstructor : ITestEventListener
     {
-        public FakeExtension_ThrowsInConstructor()
+        public FakeNUnitExtension_ThrowsInConstructor()
         {
             throw new NotImplementedException();
         }
 
         public void OnTestEvent(string text)
-        {
-            throw new System.NotImplementedException();
-        }
-    }
-}
-#endif
-
-namespace NUnit.Engine.Extensibility
-{
-    //[Extension(Path = "/NUnit/Engine/TypeExtensions/IProjectLoader/")]
-    [Extension]
-    public class FakeProjectLoader : IProjectLoader
-    {
-        public bool CanLoadFrom(string path)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public NUnit.Engine.Extensibility.IProject LoadFrom(string path)
         {
             throw new System.NotImplementedException();
         }
