@@ -23,10 +23,10 @@
         <DebugSymbols>true</DebugSymbols>
         <!-- Commonly Used Package Versions -->
         <AnnotatedReferenceAssemblyVersion>8.0.0</AnnotatedReferenceAssemblyVersion>
-		<EngineVersion>2.0.0-dev01907</EngineVersion>
-		<MetadataVersion>3.0.4</MetadataVersion>
-		<InternalTraceVersion>1.2.1</InternalTraceVersion>
-		<!-- Informational Settings -->
+		    <EngineVersion>2.0.0-dev01907</EngineVersion>
+    		<MetadataVersion>3.0.4</MetadataVersion>
+		    <InternalTraceVersion>1.2.1</InternalTraceVersion>
+		    <!-- Informational Settings -->
         <Company>TestCentric</Company>
         <Product>TestCentric Gui Runner and Engine</Product>
         <Trademark>TestCentric is a trademark of the TestCentric Project</Trademark>
@@ -64,7 +64,8 @@
         <Authors>CharliePoole</Authors>
         <Owners>CharliePoole</Owners>
         <Copyright>Charlie Poole and TestCentric Contributors. MIT License.</Copyright>
-        <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
         <RequireLicenseAcceptance>false</RequireLicenseAcceptance>
         <PackageProjectUrl>>https://test-centric.org</PackageProjectUrl>
         <!--<PackageIcon>testcentric.png</PackageIcon>
