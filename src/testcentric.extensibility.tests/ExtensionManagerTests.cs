@@ -11,36 +11,22 @@ using System.Reflection;
 
 namespace TestCentric.Extensibility
 {
-    [TestFixture(null)]
-    [TestFixture("/TestCentric/Engine/TypeExtensions/")]
     public class ExtensionManagerTests
     {
         protected static readonly Assembly THIS_ASSEMBLY = typeof(ExtensionManagerTests).Assembly;
         protected static readonly string THIS_ASSEMBLY_DIRECTORY = Path.GetDirectoryName(THIS_ASSEMBLY.Location);
 
-        protected static readonly Assembly TESTCENTRIC_ENGINE_API = typeof(TestCentric.Engine.Extensibility.IDriverFactory).Assembly;
-        protected static readonly Assembly NUNIT_ENGINE_API = typeof(NUnit.Engine.Extensibility.IDriverFactory).Assembly;
-
-        protected string DefaultTypeExtensionsPath;
         protected ExtensionManager ExtensionManager;
 
-        public ExtensionManagerTests(string defaultTypeExtensionsPath)
+        public ExtensionManagerTests()
         {
-            DefaultTypeExtensionsPath = defaultTypeExtensionsPath;
-
-            var prefix = defaultTypeExtensionsPath ?? "/TestCentric/TypeExtensions/";
-
             ExpectedExtensionPointPaths = new[]
             {
-                prefix + "IAgentLauncher",
-                "/NUnit/Engine/TypeExtensions/ITestEventListener",
-                "/NUnit/Engine/TypeExtensions/IService",
-                "/NUnit/Engine/TypeExtensions/IDriverFactory",
-                "/NUnit/Engine/TypeExtensions/IResultWriter",
-                "/NUnit/Engine/TypeExtensions/IProjectLoader",
-#if !NET35
-                "/NUnit/Engine/TypeExtensions/IAgentLauncher"
-#endif
+                "/TestCentric/Engine/AgentLaunchers",
+                "/TestCentric/Engine/TestEventListeners",
+                "/TestCentric/Engine/DriverFactories",
+                "/TestCentric/Engine/ResultWriters",
+                "/TestCentric/Engine/ProjectLoaders"
             };
 
             // This could be initialized inline, but it's here for clarity
@@ -48,13 +34,9 @@ namespace TestCentric.Extensibility
             {
                 typeof(TestCentric.Engine.Extensibility.IAgentLauncher),
                 typeof(NUnit.Engine.ITestEventListener),
-                typeof(NUnit.Engine.IService),
                 typeof(NUnit.Engine.Extensibility.IDriverFactory),
                 typeof(NUnit.Engine.Extensibility.IResultWriter),
                 typeof(NUnit.Engine.Extensibility.IProjectLoader),
-#if !NET35
-                typeof(NUnit.Engine.Extensibility.IAgentLauncher)
-#endif
             };
         }
 
@@ -66,22 +48,16 @@ namespace TestCentric.Extensibility
         public void CreateManager()
         {
             ExtensionManager = new ExtensionManager();
-            if (DefaultTypeExtensionsPath != null)
-                ExtensionManager.TypeExtensionPath = DefaultTypeExtensionsPath;
 
-            // Initialize ExtensionManager using extension points in TestCentric API assembly
-            // with fake extensions defined in this assembly.
+            // Initialize ExtensionManager using extension points defined in this
+            // assembly and extensions defined in the fake extensions assembly.
 
-            ExtensionManager.FindExtensionPoints(TESTCENTRIC_ENGINE_API, NUNIT_ENGINE_API);
+            ExtensionManager.FindExtensionPoints(THIS_ASSEMBLY);
             Assert.That(ExtensionManager.ExtensionPoints.Count, Is.GreaterThan(0), "No ExtensionPoints were found");
-            foreach (var extensionPoint in ExtensionManager.ExtensionPoints)
-                Console.WriteLine($"Found ExtensionPoint: {extensionPoint.TypeName} Path={extensionPoint.Path}");
 
             ExtensionManager.FindExtensionAssemblies(FAKE_EXTENSIONS_PARENT_DIRECTORY);
             ExtensionManager.CompleteExtensionDiscovery();
             Assert.That(ExtensionManager.Extensions.Count, Is.GreaterThan(0), "No Extensions were found");
-            foreach (var extension in ExtensionManager.Extensions)
-                Console.WriteLine($"Found Extension: {extension.TypeName} Path={extension.Path}");
         }
 
         #region Extension Point Tests
@@ -143,12 +119,10 @@ namespace TestCentric.Extensibility
         [
             "TestCentric.Engine.Extensibility.FakeAgentLauncher",
             "TestCentric.Engine.Extensibility.FakeAgentLauncher_ThrowsInConstructor",
-#if !NET35
-            "NUnit.Engine.Extensibility.FakeTestEventListener",
-            "NUnit.Engine.Extensibility.FakeProjectLoader",
-            "NUnit.Engine.Extensibility.FakeResultWriter",
-            "NUnit.Engine.Extensibility.FakeNUnitExtension_ThrowsInConstructor"
-#endif
+            "TestCentric.Engine.Extensibility.FakeTestEventListener",
+            "TestCentric.Engine.Extensibility.FakeProjectLoader",
+            "TestCentric.Engine.Extensibility.FakeResultWriter",
+            "TestCentric.Engine.Extensibility.FakeNUnitExtension_ThrowsInConstructor"
         ];
 
         [Test]
@@ -157,30 +131,29 @@ namespace TestCentric.Extensibility
             Assert.That(ExtensionManager.Extensions.Select(ep => ep.TypeName), Is.EquivalentTo(KnownExtensionTypeNames));
         }
 
-#if !NET35
         // Run this first as subsequent test will enable the extension
         [Test, Order(1)]
         public void ExtensionMayBeDisabledByDefault()
         {
             Assert.That(ExtensionManager.Extensions,
-                Has.One.Property(nameof(ExtensionNode.TypeName)).EqualTo("NUnit.Engine.Extensibility.FakeTestEventListener")
+                Has.One.Property(nameof(ExtensionNode.TypeName)).EqualTo("TestCentric.Engine.Extensibility.FakeTestEventListener")
                    .And.Property(nameof(ExtensionNode.Enabled)).False);
         }
 
         [Test]
         public void DisabledExtensionMayBeEnabled()
         {
-            ExtensionManager.EnableExtension("NUnit.Engine.Extensibility.FakeTestEventListener", true);
+            ExtensionManager.EnableExtension("TestCentric.Engine.Extensibility.FakeTestEventListener", true);
 
             Assert.That(ExtensionManager.Extensions,
-                Has.One.Property(nameof(ExtensionNode.TypeName)).EqualTo("NUnit.Engine.Extensibility.FakeTestEventListener")
+                Has.One.Property(nameof(ExtensionNode.TypeName)).EqualTo("TestCentric.Engine.Extensibility.FakeTestEventListener")
                    .And.Property(nameof(ExtensionNode.Enabled)).True);
         }
 
         [Test]
         public void NUnitExtensionThrowsInConstructor()
         {
-            string typeName = "NUnit.Engine.Extensibility.FakeNUnitExtension_ThrowsInConstructor";
+            string typeName = "TestCentric.Engine.Extensibility.FakeNUnitExtension_ThrowsInConstructor";
             var exNode = ExtensionManager.Extensions.Where(n => n.TypeName == typeName).Single();
 
             // Although the constructor throws, we don't get an exception.
@@ -190,7 +163,6 @@ namespace TestCentric.Extensibility
             Assert.That(exNode.Exception, Is.InstanceOf<ExtensibilityException>());
             Assert.That(exNode.Exception.InnerException, Is.InstanceOf<NotImplementedException>());
         }
-#endif
 
         [Test]
         public void TestCentricExtensionThrowsInConstructor()
@@ -209,15 +181,15 @@ namespace TestCentric.Extensibility
 #if NETCOREAPP
         [TestCase("netstandard2.0", ExpectedResult = true)]
         [TestCase("net462", ExpectedResult = false)]
-        //[TestCase("net20", ExpectedResult = false)]
+        [TestCase("net20", ExpectedResult = false)]
 #elif NET40_OR_GREATER
         [TestCase("netstandard2.0", ExpectedResult = false)]
         [TestCase("net462", ExpectedResult = true)]
-        //[TestCase("net20", ExpectedResult = true)]
+        [TestCase("net20", ExpectedResult = true)]
 #else
         [TestCase("netstandard2.0", ExpectedResult = false)]
         [TestCase("net462", ExpectedResult = false)]
-        //[TestCase("net20", ExpectedResult = true)]
+        [TestCase("net20", ExpectedResult = true)]
 #endif
         public bool LoadTargetFramework(string tfm)
         {

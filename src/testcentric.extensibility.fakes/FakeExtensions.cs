@@ -49,18 +49,9 @@ namespace TestCentric.Engine.Extensibility
             throw new NotImplementedException();
         }
     }
-}
 
-namespace NUnit.Engine.Extensibility
-{
-#if NET20
-    using NUnit.Engine.Extensibility;
-#else
-    using NUnit.Extensibility;
-#endif
-
-    [Extension(Enabled = false, Path = "/NUnit/Engine/TypeExtensions/ITestEventListener")]
-    public class FakeTestEventListener : ITestEventListener
+    [Extension(Enabled = false, Path = "/TestCentric/Engine/TestEventListeners")]
+    public class FakeTestEventListener : NUnit.Engine.ITestEventListener
     {
         public void OnTestEvent(string text)
         {
@@ -68,8 +59,8 @@ namespace NUnit.Engine.Extensibility
         }
     }
 
-    [Extension(Path = "/NUnit/Engine/TypeExtensions/IProjectLoader")]
-    public class FakeProjectLoader : IProjectLoader
+    [Extension(Path = "/TestCentric/Engine/ProjectLoaders")]
+    public class FakeProjectLoader : NUnit.Engine.Extensibility.IProjectLoader
     {
         public bool CanLoadFrom(string path)
         {
@@ -100,8 +91,8 @@ namespace NUnit.Engine.Extensibility
 //        }
 //    }
 
-    [Extension]
-    public class FakeResultWriter : IResultWriter
+    [Extension(Path="/TestCentric/Engine/ResultWriters")]
+    public class FakeResultWriter : NUnit.Engine.Extensibility.IResultWriter
     {
         public void CheckWritability(string outputPath)
         {
@@ -119,8 +110,8 @@ namespace NUnit.Engine.Extensibility
         }
     }
 
-    [Extension(Enabled = false, Path = "/NUnit/Engine/TypeExtensions/ITestEventListener")]
-    public class FakeNUnitExtension_ThrowsInConstructor : ITestEventListener
+    [Extension(Enabled = false, Path = "/TestCentric/Engine/TestEventListeners")]
+    public class FakeNUnitExtension_ThrowsInConstructor : NUnit.Engine.ITestEventListener
     {
         public FakeNUnitExtension_ThrowsInConstructor()
         {
