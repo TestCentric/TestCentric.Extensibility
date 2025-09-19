@@ -18,7 +18,7 @@
 		<file src="../../README.md" />
 		<file src="../../LICENSE.txt" />
 		<file src="../../testcentric.png" />
-		<!--<file src="net20/TestCentric.Extensibility.Api.dll" target="lib/net20" />-->
+		<file src="net20/TestCentric.Extensibility.Api.dll" target="lib/net20" />
 		<file src="net462/TestCentric.Extensibility.Api.dll" target="lib/net462" />
 		<file src="netstandard2.0/TestCentric.Extensibility.Api.dll" target="lib/netstandard2.0" />
 	</files>

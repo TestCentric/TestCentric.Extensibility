@@ -49,7 +49,7 @@ BuildSettings.Packages.Add(new NuGetPackage(
 	checks: new PackageCheck[] {
 		HasFiles(
 			"LICENSE.txt", "README.md", "testcentric.png",
-			//"lib/net20/testcentric.extensibility.api.dll",
+			"lib/net20/testcentric.extensibility.api.dll",
 			"lib/net462/testcentric.extensibility.api.dll",
 			"lib/netstandard2.0/testcentric.extensibility.api.dll") }));
 
