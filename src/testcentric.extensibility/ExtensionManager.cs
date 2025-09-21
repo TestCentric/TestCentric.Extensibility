@@ -96,26 +96,28 @@ namespace TestCentric.Extensibility
 
                 log.Info($"Assembly: {assemblyName.Name}");
 
-                foreach (Type type in assembly.GetExportedTypes())
+                try
                 {
-                    try
+                    // First check for ExtensionPoint attributes on the assembly.
+                    foreach (ExtensionPointAttribute attr in assembly.GetCustomAttributes(typeof(ExtensionPointAttribute), false))
+                        AddExtensionPoint(attr.Path, attr.Type, assemblyName, attr.Description);
+
+                    foreach (NUNIT.ExtensionPointAttribute attr in assembly.GetCustomAttributes(typeof(NUNIT.ExtensionPointAttribute), false))
+                        AddExtensionPoint(attr.Path, attr.Type, assemblyName, attr.Description);
+
+                    // Check each exported type for TypeExtensionPoint attributes
+                    foreach (Type type in assembly.GetExportedTypes())
                     {
                         foreach (TypeExtensionPointAttribute attr in type.GetCustomAttributes(typeof(TypeExtensionPointAttribute), false))
                             AddExtensionPoint(attr.Path ?? TypeExtensionPath + type.Name, type, assemblyName, attr.Description);
 
-                        foreach (ExtensionPointAttribute attr in assembly.GetCustomAttributes(typeof(ExtensionPointAttribute), false))
-                            AddExtensionPoint(attr.Path, attr.Type, assemblyName, attr.Description);
-
                         foreach (NUNIT.TypeExtensionPointAttribute attr in type.GetCustomAttributes(typeof(NUNIT.TypeExtensionPointAttribute), false))
                             AddExtensionPoint(attr.Path ?? NUNIT_TYPE_EXTENSIONS_PATH + type.Name, type, assemblyName, attr.Description);
-
-                        foreach (NUNIT.ExtensionPointAttribute attr in assembly.GetCustomAttributes(typeof(NUNIT.ExtensionPointAttribute), false))
-                            AddExtensionPoint(attr.Path, attr.Type, assemblyName, attr.Description);
                     }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine(ex.ToString());
-                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
                 }
             }
 
