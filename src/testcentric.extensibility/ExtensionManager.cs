@@ -489,17 +489,19 @@ namespace TestCentric.Extensibility
                     ExtensionNode extensionNode = BuildExtensionNode(extensionAttr, extensionType, extensionAssembly);
                     ExtensionPoint? extensionPoint = BuildExtensionPoint(extensionNode, extensionType, extensionAssembly.FromWildCard);
 
-                    string? versionArg = extensionAttr.GetNamedArgument("EngineVersion") as string;
-                    if (versionArg is not null && !CheckRequiredVersion(versionArg, extensionPoint))
-                        log.Warning($"  Ignoring {extensionType.Name}. It requires version {versionArg}.");
-                    else
-                    {
-                        AddExtensionPropertiesToNode(extensionType, extensionNode);
+                    // TODO: Ignoring version requirement for now. Decide whether or how to implement
+                    // it for varying hosts. Replace with ExtensibilityVersion?
+                    //string? versionArg = extensionAttr.GetNamedArgument("EngineVersion") as string;
+                    //if (versionArg is not null && !CheckRequiredVersion(versionArg, extensionPoint))
+                    //    log.Warning($"  Ignoring {extensionType.Name}. It requires version {versionArg}.");
+                    //else
+                    //{
+                    AddExtensionPropertiesToNode(extensionType, extensionNode);
 
-                        _extensions.Add(extensionNode);
-                        extensionPoint.Install(extensionNode);
-                        log.Info($"    Installed at path {extensionNode.Path}");
-                    }
+                    _extensions.Add(extensionNode);
+                    extensionPoint.Install(extensionNode);
+                    log.Info($"    Installed at path {extensionNode.Path}");
+                    //}
                 }
             }
         }
