@@ -488,20 +488,22 @@ namespace TestCentric.Extensibility
 
                     ExtensionNode extensionNode = BuildExtensionNode(extensionAttr, extensionType, extensionAssembly);
                     ExtensionPoint? extensionPoint = BuildExtensionPoint(extensionNode, extensionType, extensionAssembly.FromWildCard);
+                    if (extensionPoint is null)
+                        log.Warning($"Extension ignored - Unable to deduce ExtensionPoint.");
 
                     // TODO: Ignoring version requirement for now. Decide whether or how to implement
                     // it for varying hosts. Replace with ExtensibilityVersion?
                     //string? versionArg = extensionAttr.GetNamedArgument("EngineVersion") as string;
                     //if (versionArg is not null && !CheckRequiredVersion(versionArg, extensionPoint))
                     //    log.Warning($"  Ignoring {extensionType.Name}. It requires version {versionArg}.");
-                    //else
-                    //{
-                    AddExtensionPropertiesToNode(extensionType, extensionNode);
+                    else
+                    {
+                        AddExtensionPropertiesToNode(extensionType, extensionNode);
 
-                    _extensions.Add(extensionNode);
-                    extensionPoint.Install(extensionNode);
-                    log.Info($"    Installed at path {extensionNode.Path}");
-                    //}
+                        _extensions.Add(extensionNode);
+                        extensionPoint.Install(extensionNode);
+                        log.Info($"    Installed at path {extensionNode.Path}");
+                    }
                 }
             }
         }
@@ -519,24 +521,20 @@ namespace TestCentric.Extensibility
             return node;
         }
 
-        private ExtensionPoint BuildExtensionPoint(ExtensionNode node, TypeDefinition type, bool fromWildCard)
+        private ExtensionPoint? BuildExtensionPoint(ExtensionNode node, TypeDefinition type, bool fromWildCard)
         {
             ExtensionPoint? ep;
 
-            if (node.Path is null)
-            {
-                ep = DeduceExtensionPointFromType(type);
-                if (ep is null)
-                    throw new ExtensibilityException($"Unable to deduce ExtensionPoint for Type {type.FullName}. Specify Path on ExtensionAttribute to resolve.");
-
-                log.Debug($"    Deduced Path {ep.Path}");
-                node.Path = ep.Path;
-            }
+            if (node.Path is not null)
+                ep = GetExtensionPoint(node.Path);
             else
             {
-                ep = GetExtensionPoint(node.Path);
-                if (ep is null)
-                    throw new ExtensibilityException($"Unable to locate ExtensionPoint for Type {type.FullName}. The Path {node.Path} cannot be found.");
+                ep = DeduceExtensionPointFromType(type);
+                if (ep is not null)
+                {
+                    log.Debug($"    Deduced Path {ep.Path}");
+                    node.Path = ep.Path;
+                }
             }
 
             return ep;
