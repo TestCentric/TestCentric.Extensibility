@@ -38,9 +38,9 @@ namespace TestCentric.Extensibility
         private const string TESTCENTRIC_EXTENSION_ATTRIBUTE = "TestCentric.Extensibility.ExtensionAttribute";
         private const string TESTCENTRIC_EXTENSION_PROPERTY_ATTRIBUTE = "TestCentric.Extensibility.ExtensionPropertyAttribute";
 
-        // TODO: These are NUnit V4 attributes.
-        private const string NUNIT_EXTENSION_ATTRIBUTE = "NUnit.Extensibility.ExtensionAttribute";
-        private const string NUNIT_EXTENSION_PROPERTY_ATTRIBUTE = "NUnit.Extensibility.ExtensionPropertyAttribute";
+        private const string NUNIT3_EXTENSION_ATTRIBUTE = "NUnit.Engine.Extensibility.ExtensionAttribute";
+        private const string NUNIT4_EXTENSION_ATTRIBUTE = "NUnit.Extensibility.ExtensionAttribute";
+        private const string NUNIT4_EXTENSION_PROPERTY_ATTRIBUTE = "NUnit.Extensibility.ExtensionPropertyAttribute";
 
         // List of all ExtensionPoints discovered
         private readonly List<ExtensionPoint> _extensionPoints = new List<ExtensionPoint>();
@@ -478,7 +478,8 @@ namespace TestCentric.Extensibility
             {
                 CustomAttribute extensionAttr =
                     extensionType.GetAttribute(TESTCENTRIC_EXTENSION_ATTRIBUTE) ??
-                    extensionType.GetAttribute(NUNIT_EXTENSION_ATTRIBUTE);
+                    extensionType.GetAttribute(NUNIT4_EXTENSION_ATTRIBUTE) ??
+                    extensionType.GetAttribute(NUNIT3_EXTENSION_ATTRIBUTE);
 
                 if (extensionAttr is null)
                     log.Debug($"  Type: {extensionType.Name} - not an extension");
@@ -573,7 +574,7 @@ namespace TestCentric.Extensibility
             // TODO: Review this
             // This code allows use of TestCentric and NUnit versions of the extension property
             // attribute for either type of extension. We may want to prevent that in future.
-            var propAttrs = new[] { TESTCENTRIC_EXTENSION_PROPERTY_ATTRIBUTE, NUNIT_EXTENSION_PROPERTY_ATTRIBUTE };
+            var propAttrs = new[] { TESTCENTRIC_EXTENSION_PROPERTY_ATTRIBUTE, NUNIT4_EXTENSION_PROPERTY_ATTRIBUTE };
             foreach (string attrName in propAttrs)
                 foreach (var attr in type.GetAttributes(attrName))
                 {
