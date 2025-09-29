@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>net35;net462;net6.0</TargetFrameworks>
+		<TargetFrameworks>net462;net6.0</TargetFrameworks>
 		<RootNamespace>TestCentric.Extensibility</RootNamespace>
 		<SignAssembly>true</SignAssembly>
 		<AssemblyOriginatorKeyFile>testcentric.snk</AssemblyOriginatorKeyFile>
@@ -14,10 +14,6 @@
 	<ItemGroup>
 		<ProjectReference Include="..\TestCentric.Extensibility\TestCentric.Extensibility.csproj" />
 		<ProjectReference Include="..\TestCentric.Extensibility.Api\TestCentric.Extensibility.Api.csproj" />
-	</ItemGroup>
-
-	<ItemGroup Condition="'$(TargetFramework)'=='net35'">
-		<PackageReference Include="NSubstitute" Version="2.0.3" />
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(TargetFramework)'=='net462'">

@@ -17,13 +17,8 @@ namespace TestCentric.Extensibility
     {
         private static readonly Logger log = InternalTrace.GetLogger(typeof(ExtensionAssemblyTracker));
 
-#if NET20
-        private readonly Dictionary<string, bool> _evaluatedPaths = new Dictionary<string, bool>();
-        public bool ContainsPath(string path) => _evaluatedPaths.ContainsKey(path);
-#else
         private readonly HashSet<string> _evaluatedPaths = new HashSet<string>();
         public bool ContainsPath(string path) => _evaluatedPaths.Contains(path);
-#endif
 
         private readonly Dictionary<string, ExtensionAssembly> _byName = new Dictionary<string, ExtensionAssembly>();
 
@@ -36,11 +31,8 @@ namespace TestCentric.Extensibility
         public void AddOrUpdate(ExtensionAssembly candidateAssembly)
         {
             string assemblyName = candidateAssembly.AssemblyName;
-#if NET20
-            _evaluatedPaths.Add(candidateAssembly.FilePath, true);
-#else
             _evaluatedPaths.Add(candidateAssembly.FilePath);
-#endif
+
             // Do we already have a copy of the same assembly at a different path?
             if (_byName.TryGetValue(assemblyName, out var existing))
             {

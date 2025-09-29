@@ -22,11 +22,6 @@
 		<file src="../../README.md" />
 		<file src="../../LICENSE.txt" />
 		<file src="../../testcentric.png" />
-		<!--<file src="net20/TestCentric.Extensibility.dll" target="lib/net20" />
-		<file src="net20/TestCentric.Extensibility.pdb" target="lib/net20" />
-		<file src="net20/TestCentric.Extensibility.Api.dll" target="lib/net20" />
-		<file src="net20/TestCentric.Extensibility.Api.pdb" target="lib/net20" />
-		<file src="net20/nunit.engine.api.dll" target="lib/net20" />-->
 		<file src="net462/TestCentric.Extensibility.dll" target="lib/net462" />
 		<file src="net462/TestCentric.Extensibility.pdb" target="lib/net462" />
 		<file src="net462/TestCentric.Extensibility.Api.dll" target="lib/net462" />

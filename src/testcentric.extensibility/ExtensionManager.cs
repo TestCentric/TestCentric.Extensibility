@@ -9,11 +9,7 @@ using System.IO;
 using System.Reflection;
 using TestCentric.Metadata;
 
-#if NET20
-using NUNIT = NUnit.Engine.Extensibility;
-#else
 using NUNIT = NUnit.Extensibility;
-#endif
 
 namespace TestCentric.Extensibility
 {
