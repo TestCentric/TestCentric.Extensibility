@@ -123,4 +123,13 @@ namespace TestCentric.Engine.Extensibility
             throw new System.NotImplementedException();
         }
     }
+
+    [NUnit.Extensibility.Extension]
+    public class FakeNUnit4Listener : NUnit.Engine.ITestEventListener
+    {
+        public void OnTestEvent(string text)
+        {
+            throw new System.NotImplementedException();
+        }
+    }
 }

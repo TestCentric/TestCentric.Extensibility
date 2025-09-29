@@ -122,39 +122,54 @@ namespace TestCentric.Extensibility
             "TestCentric.Engine.Extensibility.FakeTestEventListener",
             "TestCentric.Engine.Extensibility.FakeProjectLoader",
             "TestCentric.Engine.Extensibility.FakeResultWriter",
-            "TestCentric.Engine.Extensibility.FakeNUnitExtension_ThrowsInConstructor"
+            "TestCentric.Engine.Extensibility.FakeNUnitExtension_ThrowsInConstructor",
+            "TestCentric.Engine.Extensibility.FakeNUnit4Listener"
         ];
 
-        [Test]
+        private static string[] KnownExtensionPaths =
+        [
+            "/TestCentric/Engine/AgentLaunchers",
+            "/TestCentric/Engine/AgentLaunchers",
+            "/TestCentric/Engine/TestEventListeners",
+            "/TestCentric/Engine/ProjectLoaders",
+            "/TestCentric/Engine/ResultWriters",
+            "/TestCentric/Engine/TestEventListeners",
+            "/TestCentric/Engine/TestEventListeners"
+        ];
+
+        private const string INITIALLY_DISABLED_EXTENSION = "TestCentric.Engine.Extensibility.FakeTestEventListener";
+        [Test, Order(1)]
         public void AllExtensionsAreKnown()
         {
             Assert.That(ExtensionManager.Extensions.Select(ep => ep.TypeName), Is.EquivalentTo(KnownExtensionTypeNames));
         }
 
-        // Run this first as subsequent test will enable the extension
-        [Test, Order(1)]
-        public void ExtensionMayBeDisabledByDefault()
+        [TestCaseSource(nameof(KnownExtensionTypeNames)), Order(2)]
+        public void ExtensionStatusIsCorrect(string typeName)
         {
-            Assert.That(ExtensionManager.Extensions,
-                Has.One.Property(nameof(ExtensionNode.TypeName)).EqualTo("TestCentric.Engine.Extensibility.FakeTestEventListener")
-                   .And.Property(nameof(ExtensionNode.Enabled)).False);
+            Assert.That(GetExtensionNode(typeName).Status, Is.EqualTo(ExtensionStatus.Unloaded));
         }
 
-        [Test]
-        public void DisabledExtensionMayBeEnabled()
+        [Test, Sequential, Order(3)]
+        public void ExtensionsAreEnabledAsExpected(
+            [ValueSource(nameof(KnownExtensionTypeNames))] string typeName,
+            [Values(true, false, false, true, true, false, true)] bool enabled)
         {
-            ExtensionManager.EnableExtension("TestCentric.Engine.Extensibility.FakeTestEventListener", true);
+            Assert.That(GetExtensionNode(typeName).Enabled, Is.EqualTo(enabled));
+        }
 
-            Assert.That(ExtensionManager.Extensions,
-                Has.One.Property(nameof(ExtensionNode.TypeName)).EqualTo("TestCentric.Engine.Extensibility.FakeTestEventListener")
-                   .And.Property(nameof(ExtensionNode.Enabled)).True);
+        [Test, Order(4)]
+        public void ExtensionMayBeDisabledByDefault()
+        {
+            Assert.That(GetExtensionNode(INITIALLY_DISABLED_EXTENSION).Enabled, Is.False);
+            ExtensionManager.EnableExtension(INITIALLY_DISABLED_EXTENSION, true);
+            Assert.That(GetExtensionNode(INITIALLY_DISABLED_EXTENSION).Enabled, Is.True);
         }
 
         [Test]
         public void NUnitExtensionThrowsInConstructor()
         {
-            string typeName = "TestCentric.Engine.Extensibility.FakeNUnitExtension_ThrowsInConstructor";
-            var exNode = ExtensionManager.Extensions.Where(n => n.TypeName == typeName).Single();
+            var exNode = GetExtensionNode("TestCentric.Engine.Extensibility.FakeNUnitExtension_ThrowsInConstructor");
 
             // Although the constructor throws, we don't get an exception.
             // However, the node contains the error information.
@@ -178,25 +193,19 @@ namespace TestCentric.Extensibility
             Assert.That(exNode.Exception.InnerException, Is.InstanceOf<NotImplementedException>());
         }
 
-#if NETCOREAPP
-        [TestCase("netstandard2.0", ExpectedResult = true)]
-        [TestCase("net462", ExpectedResult = false)]
-        [TestCase("net20", ExpectedResult = false)]
-#elif NET40_OR_GREATER
+#if NETFRAMEWORK
         [TestCase("netstandard2.0", ExpectedResult = false)]
         [TestCase("net462", ExpectedResult = true)]
-        [TestCase("net20", ExpectedResult = true)]
 #else
-        [TestCase("netstandard2.0", ExpectedResult = false)]
+        [TestCase("netstandard2.0", ExpectedResult = true)]
         [TestCase("net462", ExpectedResult = false)]
-        [TestCase("net20", ExpectedResult = true)]
 #endif
         public bool LoadTargetFramework(string tfm)
         {
             return ExtensionManager.CanLoadTargetFramework(THIS_ASSEMBLY, FakeExtensions(tfm));
         }
 
-        #endregion
+#endregion
 
         private const string FAKE_EXTENSIONS_FILENAME = "TestCentric.Extensibility.FakeExtensions.dll";
         private static readonly string FAKE_EXTENSIONS_PARENT_DIRECTORY =
@@ -213,5 +222,8 @@ namespace TestCentric.Extensibility
             return new ExtensionAssembly(
                 Path.Combine(FAKE_EXTENSIONS_PARENT_DIRECTORY, Path.Combine(tfm, FAKE_EXTENSIONS_FILENAME)), false);
         }
+
+        private ExtensionNode GetExtensionNode(string typeName) =>
+            ExtensionManager.Extensions.Where(n => n.TypeName == typeName).Single();
     }
 }

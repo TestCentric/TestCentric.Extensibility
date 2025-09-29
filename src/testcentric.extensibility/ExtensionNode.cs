@@ -5,9 +5,7 @@
 
 using System;
 using System.Collections.Generic;
-#if !NET20
 using System.Linq;
-#endif
 using System.Reflection;
 
 namespace TestCentric.Extensibility
@@ -103,11 +101,7 @@ namespace TestCentric.Extensibility
             if (_properties.TryGetValue(name, out List<string>? value))
                 return value;
             else
-#if NET20
-                return new string[0];
-#else
                 return Enumerable.Empty<string>();
-#endif
         }
 
         /// <summary>
